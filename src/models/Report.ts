@@ -1,7 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 export interface IReport {
-   review: mongoose.Schema.Types.ObjectId;
+   id: ObjectId;
+   review: ObjectId;
    reportDate: Date;
    reportDescription: string;
 }
