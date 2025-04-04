@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import {IRedeemable} from './Redeemable';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -13,6 +14,7 @@ export interface IUser {
   password: string;
   role: string;
   point: number;
+  inventory:IRedeemable[];
   resetPasswordToken: string;
   resetPasswordExpired: Date;
   createdAt: Date;
@@ -54,6 +56,13 @@ const UserSchema = new mongoose.Schema({
   point: {
     type: Number,
     default: 0,
+  },
+  inventory:{
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Redeemable',
+    }],
+    default: [],
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
