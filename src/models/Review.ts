@@ -1,7 +1,7 @@
 import mongoose, { ObjectId } from "mongoose";
 
 export interface IReview {
-   id: ObjectId;
+   _id: ObjectId;
    booking: ObjectId;
    createdAt: Date;
    rating: number;

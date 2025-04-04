@@ -1,7 +1,7 @@
 import mongoose, { ObjectId } from "mongoose";
 
 export interface IReport {
-   id: ObjectId;
+   _id: ObjectId;
    review: ObjectId;
    reportDate: Date;
    reportDescription: string;
