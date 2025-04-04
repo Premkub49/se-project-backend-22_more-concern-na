@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import {IRedeemable} from './Redeemable';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -9,10 +10,12 @@ export interface AuthRequest extends Request {
 export interface IUser {
   name: string;
   tel: string;
+  picture?: string;
   email: string;
   password: string;
   role: string;
   point: number;
+  inventory:IRedeemable[];
   resetPasswordToken: string;
   resetPasswordExpired: Date;
   createdAt: Date;
@@ -30,6 +33,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a telephone number'],
     match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
+  },
+  picture: {
+    type: String,
+    match: [
+      /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
+      'Please provide a valid URL',
+    ],
   },
   email: {
     type: String,
@@ -54,6 +64,13 @@ const UserSchema = new mongoose.Schema({
   point: {
     type: Number,
     default: 0,
+  },
+  inventory:{
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Redeemable',
+    }],
+    default: [],
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
