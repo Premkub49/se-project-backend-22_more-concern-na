@@ -22,8 +22,8 @@ const ReviewSchema = new mongoose.Schema({
    rating: {
       type: Number,
       required: [true, 'Please add a rating'],
-      min: 1,
-      max: 5,
+      min: [1, 'Rating must be at least 1'],
+      max: [5, 'Rating must be at most 5'],
    },
    parentReview: {
       type: mongoose.Schema.Types.ObjectId,
