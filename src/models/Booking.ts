@@ -5,6 +5,7 @@ interface BookingType{
     count: number
 }
 export interface IBooking {
+    _id: mongoose.Schema.Types.ObjectId;
     user:mongoose.Schema.Types.ObjectId,
     hotel: mongoose.Schema.Types.ObjectId,
     status: string,

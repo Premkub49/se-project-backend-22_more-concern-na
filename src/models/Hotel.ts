@@ -18,6 +18,7 @@ interface Rooms {
 }
 
 export interface IHotel {
+    _id: mongoose.Schema.Types.ObjectId,
     name : string,
     description?: string,
     picture? : string, 

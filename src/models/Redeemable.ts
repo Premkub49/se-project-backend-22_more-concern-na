@@ -1,7 +1,7 @@
 import mongoose, { ObjectId } from "mongoose";
 
 export interface IRedeemable {
-    id: ObjectId;
+    _id: ObjectId;
     type: string;
     name: string;
     description?: string;
