@@ -1,20 +1,20 @@
-import { configDotenv } from "dotenv";
-import express, { Express } from "express";
-import morgan from "morgan";
-import connectDB from "./config/db";
-import hotels from "routes/hotels"
+import { configDotenv } from 'dotenv';
+import express, { Express } from 'express';
+import morgan from 'morgan';
+import hotels from 'routes/hotels';
+import connectDB from './config/db';
 
-configDotenv({path: '.env'})
+configDotenv({ path: '.env' });
 
 const app: Express = express();
 connectDB();
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 app.use(express.json());
 
-app.use("/hotels",hotels);
+app.use('/hotels', hotels);
 
-const HOST = process.env.HOST || "http://localhost";
+const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
-    console.log(`Server is running on ${HOST}:${PORT}`);
+  console.log(`Server is running on ${HOST}:${PORT}`);
 });
