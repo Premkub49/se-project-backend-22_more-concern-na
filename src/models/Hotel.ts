@@ -10,17 +10,22 @@ interface Address {
 
 interface Rooms {
     roomType : string,
-    picture : string,
-    numberOfRooms : number,
+    picture? : string,
+    capacity : number,
+    maxCount: number,
+    remainingCount : number,
     price : number
 }
 
 export interface IHotel {
     name : string,
-    picture : string, 
+    description?: string,
+    picture? : string, 
     adress : Address,
     tel : string,
-    rooms : Rooms[] 
+    rooms : Rooms[],
+    ratingSum : number,
+    ratingCount : number
 }
 
 const HotelSchema = new mongoose.Schema({
@@ -39,32 +44,27 @@ const HotelSchema = new mongoose.Schema({
             "Please provide a valid URL",
         ],
     },
-    address : {
-        type : Object,
-        required: [true, "Please add an address"],
-        properties: {
-            buidling_number: {
-                type: String,
-                required: [true, "Please provide a building number"],
-            },
-            street: {
-                type: String,
-                required: [true, "Please provide a street"],
-            },
-            district: {
-                type: String,
-                required: [true, "Please provide a city"],
-            },
-            province: {
-                type: String,
-                required: [true, "Please provide a state"],
-            },
-            postalcode: {
-                type: String,
-                required: [true, "Please provide a postalcode"],
-                maxlength: [5, "postalcode cannot be more than 5 characters"],
-                minlength: [5, "postalcode cannot be less than 5 characters"],},
-        },
+    buidling_number: {
+        type: String,
+        required: [true, "Please provide a building number"],
+    },
+    street: {
+        type: String,
+        required: [true, "Please provide a street"],
+    },
+    district: {
+        type: String,
+        required: [true, "Please provide a city"],
+    },
+    province: {
+        type: String,
+        required: [true, "Please provide a state"],
+    },
+    postalcode: {
+        type: String,
+        required: [true, "Please provide a postalcode"],
+        maxlength: [5, "postalcode cannot be more than 5 characters"],
+        minlength: [5, "postalcode cannot be less than 5 characters"],
     },
     tel: {
         type: String,
@@ -86,15 +86,31 @@ const HotelSchema = new mongoose.Schema({
                     "Please provide a valid URL",
                 ],
             },
-            numberOfRooms: {
+            capacity: {
                 type: Number,
-                required: [true, "Please add a number of rooms"],
+                required: [true, "Please add a capacity"],
+            },
+            maxCount: {
+                type: Number,
+                requeired: [true, "Please add a maxCount"],
+            },
+            remainingRooms: {
+                type: Number,
+                requeired: [true, "Please add a remainingRooms"]
             },
             price: {
                 type: Number,
                 required: [true, "Please add a price"],
             },
         }
+    },
+    ratingSum: {
+        type: Number,
+        default: 0
+    },
+    ratingCount: {
+        type: Number,
+        default: 0,
     }
 },
 {

@@ -1,5 +1,20 @@
 import mongoose from "mongoose";
 
+interface BookingType{
+    roomType: string,
+    count: number
+}
+export interface IBooking {
+    user:mongoose.Schema.Types.ObjectId,
+    hotel: mongoose.Schema.Types.ObjectId,
+    status: string,
+    price: number,
+    startDate: Date,
+    endDate: Date,
+    rooms: BookingType[]
+
+}
+
 const BookingSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -13,8 +28,12 @@ const BookingSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["comfirmed", "canceled", "checked In", "completed", "no show" ],
-        default: "comfirmed",
+        enum: ["reserved", "checkedIn", "completed"],
+        default: "reserved",
+    },
+    price: {
+        type: Number,
+        required: [true, "Please add a price"]
     },
     startDate: {
         type: Date,
@@ -32,7 +51,7 @@ const BookingSchema = new mongoose.Schema({
                 type: String,
                 required: [true, "Please add a room type"],
             },
-            numberOfRooms: {
+            count: {
                 type: Number,
                 required: [true, "Please add a number of rooms"],
             },
