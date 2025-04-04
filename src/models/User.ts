@@ -10,6 +10,7 @@ export interface AuthRequest extends Request {
 export interface IUser {
   name: string;
   tel: string;
+  picture?: string;
   email: string;
   password: string;
   role: string;
@@ -32,6 +33,13 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a telephone number'],
     match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
+  },
+  picture: {
+    type: String,
+    match: [
+      /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
+      'Please provide a valid URL',
+    ],
   },
   email: {
     type: String,
