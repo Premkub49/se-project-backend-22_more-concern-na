@@ -62,5 +62,3 @@ const BookingSchema = new mongoose.Schema({
         default: Date.now(),
     },
 })
-
-export default mongoose.model("Booking", BookingSchema);

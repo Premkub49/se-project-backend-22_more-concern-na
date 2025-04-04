@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 interface Address {
-    building_number : string,
-    street : string,
-    district : string,
-    province : string,
-    postalcode : string
+  building_number: string;
+  street: string;
+  district: string;
+  province: string;
+  postalcode: string;
 }
 
 interface Rooms {
@@ -28,21 +28,22 @@ export interface IHotel {
     ratingCount : number
 }
 
-const HotelSchema = new mongoose.Schema({
+const HotelSchema = new mongoose.Schema(
+  {
     name: {
-        type : String,
-        required: [true, "Please add a name"],
-        trim: true
+      type: String,
+      required: [true, 'Please add a name'],
+      trim: true,
     },
     description: {
-        type: String,
+      type: String,
     },
     picture: {
-        type: String,
-        match: [
-            /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
-            "Please provide a valid URL",
-        ],
+      type: String,
+      match: [
+        /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
+        'Please provide a valid URL',
+      ],
     },
     buidling_number: {
         type: String,
@@ -67,9 +68,9 @@ const HotelSchema = new mongoose.Schema({
         minlength: [5, "postalcode cannot be less than 5 characters"],
     },
     tel: {
-        type: String,
-        required: [true, "Please add a telephone number"],
-        match: [/^[0-9]{10}$/, "Please add a valid tel_number"]
+      type: String,
+      required: [true, 'Please add a telephone number'],
+      match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
     },
     rooms: {
         type: Array,
@@ -119,12 +120,12 @@ const HotelSchema = new mongoose.Schema({
 }
 );
 
-HotelSchema.virtual("bookings", {
-    ref: "Booking",
-    localField: "_id",
-    foreignField: "hotel",
-    justOne: false,
+HotelSchema.virtual('bookings', {
+  ref: 'Booking',
+  localField: '_id',
+  foreignField: 'hotel',
+  justOne: false,
 });
 
-export default mongoose.model("Hotel", HotelSchema);
-// module.exports = mongoose.model("Hotel", HotelSchema);   
+export default mongoose.model('Hotel', HotelSchema);
+// module.exports = mongoose.model("Hotel", HotelSchema);
