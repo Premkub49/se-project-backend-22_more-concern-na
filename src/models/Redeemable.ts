@@ -13,7 +13,7 @@ const RedeemableSchema = new mongoose.Schema({
     type:{
         type: String,
         required: [true,'Please add a type'],
-        enum: ['giftcard', 'coupon'],
+        enum: ['gift', 'coupon'],
     },
     name : { 
         type: String, 
