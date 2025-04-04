@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { model } from "mongoose";
 
 interface BookingType{
     roomType: string,
@@ -63,3 +63,5 @@ const BookingSchema = new mongoose.Schema({
         default: Date.now(),
     },
 })
+
+export default mongoose.model('Booking',BookingSchema);
