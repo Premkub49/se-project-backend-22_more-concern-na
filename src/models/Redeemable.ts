@@ -1,10 +1,11 @@
-import e from "express";
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 export interface IRedeemable {
+    id: ObjectId;
     type: string;
     name: string;
     description?: string;
+    picture?: string;
     pointUse: number;
     discount?: number;
     remainCount: number;
@@ -22,6 +23,13 @@ const RedeemableSchema = new mongoose.Schema({
     },
     description:{
         type: String,
+    },
+    picture: {
+      type: String,
+      match: [
+        /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
+        'Please provide a valid URL',
+      ],
     },
     pointUse:{
         type: Number,
