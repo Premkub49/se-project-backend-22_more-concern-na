@@ -1,12 +1,17 @@
 import { configDotenv } from "dotenv";
 import express, { Express } from "express";
 import morgan from "morgan";
+import connectDB from "./config/db";
+import hotels from "routes/hotels"
 
 configDotenv({path: '.env'})
 
 const app: Express = express();
+connectDB();
 app.use(morgan("dev"));
 app.use(express.json());
+
+app.use("/hotels",hotels);
 
 const HOST = process.env.HOST || "http://localhost";
 const PORT = process.env.PORT || 5050;
