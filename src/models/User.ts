@@ -8,6 +8,7 @@ export interface AuthRequest extends Request {
 }
 
 export interface IUser {
+  _id: mongoose.Schema.Types.ObjectId,
   name: string;
   tel: string;
   picture?: string;
