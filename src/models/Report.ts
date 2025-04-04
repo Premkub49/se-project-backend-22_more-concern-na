@@ -18,6 +18,7 @@ const ReportSchema = new mongoose.Schema({
    },
    reportDescription: {
       type: String,
+      enum: ["pedo", "bully", "suicide", "violence", "nsfw", "spam", "scam", "other"],
       required: [true, "Please add a report description"],
    },
 });
