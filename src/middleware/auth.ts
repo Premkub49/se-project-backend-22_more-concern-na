@@ -2,7 +2,7 @@ import { NextFunction, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import User, { AuthRequest } from '../models/User';
 
-exports.protect = async (req: any, res: Response, next: NextFunction) => {
+export async function protect(req: any, res: Response, next: NextFunction) {
   let token;
 
   if (
@@ -37,7 +37,7 @@ exports.protect = async (req: any, res: Response, next: NextFunction) => {
   }
 }
 
-exports.authorize = async (...roles: any[]) => {
+export const authorize = async (...roles: any[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
