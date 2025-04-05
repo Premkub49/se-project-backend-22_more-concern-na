@@ -44,9 +44,7 @@ const BookingSchema = new mongoose.Schema({
         required: [true, "Please add a end date"],
     },
     rooms: {
-        type: Array,
-        required: true,
-        properties: {
+        type: [{
             roomType: {
                 type: String,
                 required: [true, "Please add a room type"],
@@ -55,7 +53,8 @@ const BookingSchema = new mongoose.Schema({
                 type: Number,
                 required: [true, "Please add a number of rooms"],
             },
-        }
+        }],
+        required: true,
     },
     createdAt: {
         type: Date,
