@@ -1,37 +1,38 @@
 import mongoose, { ObjectId } from "mongoose";
-
+//TODO-recheck code
 export interface IReview {
    _id: ObjectId;
-   booking: ObjectId;
+   booking?: ObjectId;
+   rating?: number;
+   reply?: ObjectId;
+   title?: string;
+   text?: string;
    createdAt: Date;
-   rating: number;
-   parentReview?: ObjectId;
-   comment: string;
 }
 
 const ReviewSchema = new mongoose.Schema({
    booking: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Booking',
-      required: true,
+   },
+   rating: {
+      type: Number,
+      min: [1, 'Rating must be at least 1'],
+      max: [5, 'Rating must be at most 5'],
+   },
+   reply: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Review',
+   },
+   title: {
+      type: String,
+   },
+   text: {
+      type: String,
    },
    createdAt: {
       type: Date,
       default: Date.now(),
-   },
-   rating: {
-      type: Number,
-      required: [true, 'Please add a rating'],
-      min: [1, 'Rating must be at least 1'],
-      max: [5, 'Rating must be at most 5'],
-   },
-   parentReview: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Review',
-   },
-   comment: {
-      type: String,
-      required: [true, 'Please add a comment'],
    },
 })
 
