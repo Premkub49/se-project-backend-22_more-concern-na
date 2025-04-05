@@ -19,8 +19,8 @@ export interface IUser{
   resetPasswordToken?: string;
   resetPasswordExpired?: Date;
   createdAt: Date;
-  getSignedJwtToken?: Function;
-  matchPassword?: Function;
+  getSignedJwtToken: () => string;
+  matchPassword: (enteredPassword: string)=> Promise<boolean>;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -33,6 +33,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a telephone number'],
     match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
+    trim: true
   },
   picture: {
     type: String,
@@ -45,6 +46,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide an email'],
     unique: true,
+    lowercase: true,
     match: [
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       'Please provide a valid email',
@@ -88,8 +90,12 @@ const UserSchema = new mongoose.Schema({
 
 //Use salt to hash password
 UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 //Sign JWT and return
