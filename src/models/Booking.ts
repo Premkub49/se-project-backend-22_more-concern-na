@@ -41,7 +41,7 @@ const BookingSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date,
-        required: [true, "Please add a end date"],
+        required: [true, "Please add an end date"],
     },
     rooms: {
         type: [{
