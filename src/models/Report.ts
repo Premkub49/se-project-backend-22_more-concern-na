@@ -14,7 +14,7 @@ const ReportSchema = new mongoose.Schema({
    },
    reportDate: {
       type: Date,
-      default: Date.now(),
+      default: () => Date.now(),
    },
    reportReason: {
       type: String,
