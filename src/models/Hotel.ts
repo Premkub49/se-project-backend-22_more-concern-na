@@ -1,28 +1,23 @@
-import mongoose from 'mongoose';
-
-interface Address {
-  building_number: string;
-  street: string;
-  district: string;
-  province: string;
-  postalcode: string;
-}
-
+import mongoose, {ObjectId} from 'mongoose';
 interface Rooms {
     roomType : string,
     picture? : string,
     capacity : number,
     maxCount: number,
-    remainingCount : number,
+    remainCount : number,
     price : number
 }
 
 export interface IHotel {
-    _id: mongoose.Schema.Types.ObjectId,
+    _id: ObjectId,
     name : string,
     description?: string,
     picture? : string, 
-    adress : Address,
+    buildingNumber: string,
+    street: string,
+    district: string,
+    province: string,
+    postalCode: string,
     tel : string,
     rooms : Rooms[],
     ratingSum : number,
@@ -46,7 +41,7 @@ const HotelSchema = new mongoose.Schema(
         'Please provide a valid URL',
       ],
     },
-    buidling_number: {
+    buidlingNumber: {
         type: String,
         required: [true, "Please provide a building number"],
     },
@@ -96,7 +91,7 @@ const HotelSchema = new mongoose.Schema(
                 type: Number,
                 requeired: [true, "Please add a maxCount"],
             },
-            remainingRooms: {
+            remainCount: {
                 type: Number,
                 requeired: [true, "Please add a remainingRooms"]
             },
