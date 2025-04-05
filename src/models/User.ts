@@ -1,14 +1,12 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
-import {IRedeemable} from './Redeemable';
-
-export interface AuthRequest extends Request {
-  user?: any;
+import mongoose,{ ObjectId } from 'mongoose';
+interface UserRedeemable {
+  redeemableId: ObjectId;
+  count: number;
 }
-
-export interface IUser {
-  _id: mongoose.Schema.Types.ObjectId,
+export interface IUser{
+  _id: ObjectId,
   name: string;
   tel: string;
   picture?: string;
@@ -16,12 +14,12 @@ export interface IUser {
   password: string;
   role: string;
   point: number;
-  inventory:IRedeemable[];
-  resetPasswordToken: string;
-  resetPasswordExpired: Date;
+  inventory:UserRedeemable;
+  resetPasswordToken?: string;
+  resetPasswordExpired?: Date;
   createdAt: Date;
-  getSignedJwtToken: Function;
-  matchPassword: Function;
+  getSignedJwtToken?: Function;
+  matchPassword?: Function;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -67,10 +65,15 @@ const UserSchema = new mongoose.Schema({
     default: 0,
   },
   inventory:{
-    type: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Redeemable',
-    }],
+    type: Array,
+      properties:{
+        redeemableId:{
+          type: mongoose.Schema.Types.ObjectId,
+        },
+        count: {
+          type: Number
+        }
+      },
     default: [],
   },
   resetPasswordToken: String,
