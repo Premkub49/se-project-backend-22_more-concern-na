@@ -1,5 +1,4 @@
 import mongoose, { ObjectId } from "mongoose";
-
 export interface IRedeemable {
     _id: ObjectId;
     type: string;
@@ -38,7 +37,7 @@ const RedeemableSchema = new mongoose.Schema({
     discount:{
         type: Number,
     },
-        remainCount:{
+    remainCount:{
         type: Number,
         required: [true,'Please add a remainCount'],
     },
