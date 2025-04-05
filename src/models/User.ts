@@ -14,7 +14,7 @@ export interface IUser{
   password: string;
   role: string;
   point: number;
-  inventory:UserRedeemable;
+  inventory:UserRedeemable[];
   resetPasswordToken?: string;
   resetPasswordExpired?: Date;
   createdAt: Date;
