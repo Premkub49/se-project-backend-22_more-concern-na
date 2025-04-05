@@ -19,7 +19,7 @@ const BookingSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: [true, "Please add an user id"],
+        required: [true, "Please add a user id"],
     },
     hotel: {
         type: mongoose.Schema.Types.ObjectId,
@@ -41,7 +41,7 @@ const BookingSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date,
-        required: [true, "Please add an end date"],
+        required: [true, "Please add a end date"],
     },
     rooms: {
         type: Array,
