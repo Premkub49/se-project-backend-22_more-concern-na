@@ -1,28 +1,23 @@
-import mongoose from 'mongoose';
-
-interface Address {
-  building_number: string;
-  street: string;
-  district: string;
-  province: string;
-  postalcode: string;
-}
-
+import mongoose, {ObjectId} from 'mongoose';
 interface Rooms {
     roomType : string,
     picture? : string,
     capacity : number,
     maxCount: number,
-    remainingCount : number,
+    remainCount : number,
     price : number
 }
 
 export interface IHotel {
-    _id: mongoose.Schema.Types.ObjectId,
+    _id: ObjectId,
     name : string,
     description?: string,
     picture? : string, 
-    adress : Address,
+    buildingNumber: string,
+    street: string,
+    district: string,
+    province: string,
+    postalCode: string,
     tel : string,
     rooms : Rooms[],
     ratingSum : number,
@@ -46,7 +41,7 @@ const HotelSchema = new mongoose.Schema(
         'Please provide a valid URL',
       ],
     },
-    buidling_number: {
+    buildingNumber: {
         type: String,
         required: [true, "Please provide a building number"],
     },
@@ -62,49 +57,51 @@ const HotelSchema = new mongoose.Schema(
         type: String,
         required: [true, "Please provide a state"],
     },
-    postalcode: {
+    postalCode: {
         type: String,
-        required: [true, "Please provide a postalcode"],
+        required: [true, "Please provide a postalCode"],
         maxlength: [5, "postalcode cannot be more than 5 characters"],
         minlength: [5, "postalcode cannot be less than 5 characters"],
     },
     tel: {
-      type: String,
-      required: [true, 'Please add a telephone number'],
-      match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
+        type: String,
+        required: [true, 'Please add a telephone number'],
+        match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
+        trim: true
     },
     rooms: {
-        type: Array,
+        type: [
+            {
+                roomType: {
+                    type: String,
+                    required: [true, "Please add a room type"],
+                },
+                picture: {
+                    type: String,
+                    match: [
+                        /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
+                        "Please provide a valid URL",
+                    ],
+                },
+                capacity: {
+                    type: Number,
+                    required: [true, "Please add a capacity"],
+                },
+                maxCount: {
+                    type: Number,
+                    required: [true, "Please add a maxCount"],
+                },
+                remainCount: {
+                    type: Number,
+                    required: [true, "Please add a remainingCount"]
+                },
+                price: {
+                    type: Number,
+                    required: [true, "Please add a price"],
+                },
+            }
+        ],
         required: [true, "Please add rooms"],
-        properties: {
-            roomType: {
-                type: String,
-                required: [true, "Please add a room type"],
-            },
-            picture: {
-                type: String,
-                match: [
-                    /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
-                    "Please provide a valid URL",
-                ],
-            },
-            capacity: {
-                type: Number,
-                required: [true, "Please add a capacity"],
-            },
-            maxCount: {
-                type: Number,
-                requeired: [true, "Please add a maxCount"],
-            },
-            remainingRooms: {
-                type: Number,
-                requeired: [true, "Please add a remainingRooms"]
-            },
-            price: {
-                type: Number,
-                required: [true, "Please add a price"],
-            },
-        }
     },
     ratingSum: {
         type: Number,

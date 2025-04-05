@@ -1,5 +1,4 @@
 import mongoose, { ObjectId } from "mongoose";
-
 export interface IRedeemable {
     _id: ObjectId;
     type: string;
@@ -25,11 +24,11 @@ const RedeemableSchema = new mongoose.Schema({
         type: String,
     },
     picture: {
-      type: String,
-      match: [
+        type: String,
+        match: [
         /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
         'Please provide a valid URL',
-      ],
+        ],
     },
     pointUse:{
         type: Number,
@@ -38,7 +37,7 @@ const RedeemableSchema = new mongoose.Schema({
     discount:{
         type: Number,
     },
-        remainCount:{
+    remainCount:{
         type: Number,
         required: [true,'Please add a remainCount'],
     },
