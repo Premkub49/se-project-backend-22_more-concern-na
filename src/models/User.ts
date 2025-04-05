@@ -7,6 +7,7 @@ interface UserRedeemable {
 }
 export interface IUser{
   _id: ObjectId,
+  id?: ObjectId,
   name: string;
   tel: string;
   picture?: string;
@@ -65,15 +66,16 @@ const UserSchema = new mongoose.Schema({
     default: 0,
   },
   inventory:{
-    type: Array,
-      properties:{
+    type: [
+      {
         redeemableId:{
           type: mongoose.Schema.Types.ObjectId,
         },
         count: {
           type: Number
         }
-      },
+      }
+    ],
     default: [],
   },
   resetPasswordToken: String,
