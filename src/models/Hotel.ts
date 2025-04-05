@@ -41,7 +41,7 @@ const HotelSchema = new mongoose.Schema(
         'Please provide a valid URL',
       ],
     },
-    buidlingNumber: {
+    buildingNumber: {
         type: String,
         required: [true, "Please provide a building number"],
     },
