@@ -24,11 +24,11 @@ const RedeemableSchema = new mongoose.Schema({
         type: String,
     },
     picture: {
-      type: String,
-      match: [
+        type: String,
+        match: [
         /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
         'Please provide a valid URL',
-      ],
+        ],
     },
     pointUse:{
         type: Number,
