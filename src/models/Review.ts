@@ -1,5 +1,4 @@
 import mongoose, { ObjectId } from "mongoose";
-//TODO-recheck code
 export interface IReview {
    _id: ObjectId;
    booking?: ObjectId;
