@@ -1,10 +1,9 @@
 import mongoose, { ObjectId } from "mongoose";
-
 export interface IReport {
    _id: ObjectId;
    review: ObjectId;
    reportDate: Date;
-   reportDescription: string;
+   reportReason: string;
 }
 
 const ReportSchema = new mongoose.Schema({
@@ -17,7 +16,7 @@ const ReportSchema = new mongoose.Schema({
       type: Date,
       default: Date.now(),
    },
-   reportDescription: {
+   reportReason: {
       type: String,
       enum: ["pedo", "bully", "suicide", "violence", "nsfw", "spam", "scam", "other"],
       required: [true, "Please add a report description"],
