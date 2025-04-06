@@ -1,5 +1,5 @@
 import mongoose, { ObjectId } from 'mongoose';
-interface Rooms {
+export interface Rooms {
   roomType: string;
   picture?: string;
   capacity: number;
