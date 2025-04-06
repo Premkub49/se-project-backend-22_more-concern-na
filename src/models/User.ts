@@ -66,7 +66,7 @@ const UserSchema = new mongoose.Schema({
   },
   hotel: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:"hotels"
+    ref:"Hotel"
   },
   point: {
     type: Number,
