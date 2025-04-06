@@ -113,6 +113,12 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   res.status(statusCode).cookie('token', token, options).json({
     success: true,
     token,
+    data: {
+      name: user.name,
+      picture: user.picture,
+      role:user.role,
+      point:user.point
+    }
   });
 };
 export const getMe = async (
