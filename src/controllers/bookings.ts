@@ -173,4 +173,110 @@ export async function addBooking(
       console.log(err);
       res.sendStatus(500);
    }
+
+export async function updateBooking(
+   req: Request,
+   res: Response,
+   next: NextFunction
+) {
+   try {
+      if(!req.user) {
+         res.status(401).json({ success: false, msg: 'Not authorize to access this route' });
+         return;
+      }
+
+      const bookingId = req.params.id;
+      const booking: IBooking|null = await Booking.findById(bookingId);
+      if(!booking) {
+         res.status(404).json({ success: false, msg: 'Not Found Booking' });
+         return;
+      }
+
+      if(req.user.role !== 'admin' && booking.user !== req.user._id) {
+         res.status(401).json({ success: false, msg: 'Not authorize to access this route' });
+         return;
+      }
+
+      const hotel: IHotel|null = await Hotel.findById(booking.hotel);
+      if(!hotel) {
+         res.status(404).json({ success: false, msg: 'Not Found Hotel' });
+         return;
+      }
+
+      const newBooking: IBooking = req.body;
+
+      if(!checkDayValid(newBooking.startDate.toString(), newBooking.endDate.toString(), res))
+         return;
+
+      let price = 0;
+      const rooms = newBooking.rooms;
+
+      for(const room of rooms) {
+         const roomType = hotel.rooms.find((r) => r.roomType === room.roomType);
+         const oldRoom = booking.rooms.find((r) => r.roomType === room.roomType);
+
+         if(!roomType) {
+            res.status(400).json({ success: false, msg: 'Please add valid room type' });
+            return;
+         }
+         
+         if(room.count > roomType.remainCount + (oldRoom? oldRoom.count: 0)) {
+            res.status(400).json({ success: false, msg: 'Not enough room' });
+            return;
+         }
+
+         price += room.count * roomType.price;
+      }
+
+      newBooking.price = price;
+
+      await Booking.updateOne({ _id: bookingId }, newBooking);
+      await updateRemainRoomsHotel(hotel, booking.rooms, true);
+      await updateRemainRoomsHotel(hotel, newBooking.rooms, false);
+   }
+   catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+   }
+}
+
+export async function deleteBooking(
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) {
+   try {
+      if(!req.user) {
+         res.status(401).json({ success: false, msg: 'Not authorize to access this route' });
+         return;
+      }
+      const bookingId = req.params.id;
+      const booking: IBooking|null = await Booking.findById(bookingId);
+      if(!booking) {
+         res.status(404).json({ success: false, msg: 'Not Found Booking' });
+         return;
+      }
+
+      if(req.user.role !== 'admin' && booking.user !== req.user._id) {
+         res.status(401).json({ success: false, msg: 'Not authorize to access this route' });
+         return;
+      }
+
+      const hotel: IHotel|null = await Hotel.findById(booking.hotel);
+      if(!hotel) {
+         res.status(404).json({ success: false, msg: 'Not Found Hotel' });
+         return;
+      }
+
+      await Booking.deleteOne({ _id: bookingId });
+
+      await updateRemainRoomsHotel(hotel, booking.rooms, true);
+
+      res.status(200).json({
+         success: true,
+      });
+   } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+   }
 }
