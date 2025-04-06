@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import User, { AuthRequest, IUser } from '../models/User';
+import User, { IUser } from '../models/User';
 
 interface IOption {
   expires?: Date;
@@ -47,8 +47,8 @@ export const register = async (
     });
     sendTokenResponse(user, 200, res);
   } catch (err: any) {
-    const massage = errMongoChecker(err);
-    res.status(400).json({ success: false, msg: massage });
+    const message = errMongoChecker(err);
+    res.status(400).json({ success: false, msg: message });
     console.log(err.stack);
   }
 };
@@ -70,7 +70,9 @@ export const login = async (
   if (!user) {
     return res.status(400).json({ success: false, msg: 'Invalid credentials' });
   }
-
+  if (!user.matchPassword) {
+    return res.sendStatus(500);
+  }
   const isMatch = await user.matchPassword(password);
   if (!isMatch) {
     return res.status(401).json({ success: false, msg: 'Invalid credentials' });
@@ -109,10 +111,15 @@ const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
   });
 };
 export const getMe = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+  if (!req.user || !req.user.id) {
+    return res
+      .status(401)
+      .json({ success: false, msg: 'Not authorized to access this resource' });
+  }
   const user = await User.findById(req.user.id);
   res.status(200).json({
     success: true,
