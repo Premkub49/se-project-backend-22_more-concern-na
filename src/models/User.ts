@@ -1,13 +1,13 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import mongoose,{ ObjectId } from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 interface UserRedeemable {
   redeemableId: ObjectId;
   count: number;
 }
-export interface IUser{
-  _id: ObjectId,
-  id?: ObjectId,
+export interface IUser {
+  _id: ObjectId;
+  id?: ObjectId;
   name: string;
   tel: string;
   picture?: string;
@@ -15,12 +15,12 @@ export interface IUser{
   password: string;
   role: string;
   point: number;
-  inventory:UserRedeemable[];
+  inventory: UserRedeemable[];
   resetPasswordToken?: string;
   resetPasswordExpired?: Date;
   createdAt: Date;
   getSignedJwtToken: () => string;
-  matchPassword: (enteredPassword: string)=> Promise<boolean>;
+  matchPassword: (enteredPassword: string) => Promise<boolean>;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -33,7 +33,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a telephone number'],
     match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
-    trim: true
+    trim: true,
   },
   picture: {
     type: String,
@@ -67,16 +67,16 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  inventory:{
+  inventory: {
     type: [
       {
-        redeemableId:{
+        redeemableId: {
           type: mongoose.Schema.Types.ObjectId,
         },
         count: {
-          type: Number
-        }
-      }
+          type: Number,
+        },
+      },
     ],
     default: [],
   },
