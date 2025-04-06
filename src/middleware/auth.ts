@@ -1,8 +1,12 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import User, { AuthRequest } from '../models/User';
+import User, { IUser } from '../models/User';
 
-export async function protect(req: any, res: Response, next: NextFunction) {
+export const protect: any = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   let token;
 
   if (
@@ -15,7 +19,7 @@ export async function protect(req: any, res: Response, next: NextFunction) {
   if (!token) {
     return res
       .status(401)
-      .json({ success: false, message: 'Not authorize to access this route' });
+      .json({ success: false, message: 'Not authorized to access this route' });
   }
 
   try {
@@ -27,7 +31,11 @@ export async function protect(req: any, res: Response, next: NextFunction) {
       throw new Error('Token is not valid');
     }
     console.log(decoded);
-    req.user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    req.user = user as unknown as IUser;
     next();
   } catch (err) {
     console.log(err);
@@ -35,10 +43,15 @@ export async function protect(req: any, res: Response, next: NextFunction) {
       .status(401)
       .json({ success: false, message: 'Not authorize to access this route' });
   }
-}
+};
 
 export const authorize = async (...roles: any[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user)
+      return res.status(401).json({
+        success: false,
+        message: 'User is not authenticated',
+      });
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
