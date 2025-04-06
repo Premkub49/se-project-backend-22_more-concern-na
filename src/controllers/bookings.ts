@@ -205,7 +205,9 @@ export async function updateBooking(
       }
 
       const bookingId = req.params.id;
+
       const booking: IBooking|null = await Booking.findById(bookingId);
+      console.log(bookingId);
       if(!booking) {
          res.status(404).json({ success: false, msg: 'Not Found Booking' });
          return;
@@ -240,6 +242,7 @@ export async function updateBooking(
             },
          ],
       });
+      console.log(conflictingBookings);
 
       let roomsTypes: Record<string, number> = {};
       for(const booking of conflictingBookings) {
@@ -256,6 +259,7 @@ export async function updateBooking(
             return;
          }
 
+         console.log(roomsTypes[room.roomType], room.count, roomType.maxCount);
          if (roomType && roomsTypes[room.roomType] + room.count > roomType.maxCount) {
             res.status(400).json({ success: false, msg: 'Not enough room' });
             return;
@@ -268,9 +272,14 @@ export async function updateBooking(
          (booking.endDate.getTime() - booking.startDate.getTime()) / (24 * 60 * 60 * 1000));
          
       newBooking.price = price * (dayDifference + 1);
+      console.log(newBooking.price);
       
 
       await Booking.updateOne({ _id: bookingId }, newBooking);
+
+      res.status(200).json({
+         success: true,
+      });
    }
    catch (err) {
       console.log(err);
