@@ -26,15 +26,100 @@ export async function getBookings(
    next: NextFunction,
 ) {
    try {
-      const bookings = await Booking.find();
+      if(!req.user) {
+         res.status(401).json({ success: false, msg: 'Not authorize to access this route' });
+         return;
+      }
 
-      if (!bookings) {
+      let bookings: PBooking[]|null;
+      const populateUser = {
+         path: 'user',
+         select: '_id name email tel point'
+      }
+      const populateHotel = {
+         path: 'hotel',
+         select: '_id name picture ratingSum ratingCount'
+      }
+
+      if(req.user.role === 'admin') {
+         bookings = await Booking.find()
+            .populate(populateUser)
+            .populate(populateHotel) as any as PBooking[]|null;
+      }
+      else if(req.user.role === 'hotelManager') {
+         bookings = await Booking.find()
+            .populate(populateUser)
+            .populate(populateHotel) as any as PBooking[]|null;
+      }
+      else {
+         bookings = await Booking.find({user: req.user._id})
+            .populate(populateUser)
+            .populate(populateHotel) as any as PBooking[]|null;
+      }
+
+      res.status(200).json({
+         success: true,
+         bookings: bookings
+      });
+   } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+   }
+}
+
+export async function getBooking(
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) {
+   try {
+      if(!req.user) {
+         res.status(401).json({ success: false, msg: 'Not authorize to access this route' });
+         return;
+      }
+
+      const bookingId = req.params.id;
+      const populateUser = {
+         path: 'user',
+         select: 'name email tel point'
+      }
+      const populateHotel = {
+         path: 'hotel',
+         select: 'name picture ratingSum ratingCount'
+      }
+      const booking: PBooking|null = await Booking.findById(bookingId)
+         .populate(populateHotel) as any as PBooking|null;
+
+      if(!booking) {
          res.status(404).json({ success: false, msg: 'Not Found Booking' });
          return;
       }
+
+      // if(req.user.role === 'hotelManager') {
+      //    const hotel: IHotel|null = await Hotel.findById(booking.hotel);
+      //    if(!hotel) {
+      //       return res.status(404).json({ success: false, msg: 'Not Found Hotel' });
+      //    }
+         
+
+
+      // }
+
+      if(req.user.role !== 'admin' && booking.user._id !== req.user._id) {
+         res.status(401).json({ success: false, msg: 'Not authorize to access this route' });
+         return;
+      }
+
       res.status(200).json({
          success: true,
-         bookings: bookings,
+         booking: booking,
+      });
+   } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+   }
+}
+
 export async function addBooking(
    req: Request,
    res: Response,
