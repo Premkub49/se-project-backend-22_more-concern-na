@@ -156,6 +156,9 @@ export async function addBooking(
       let roomsTypes: Record<string, number> = {};
       for(const booking of conflictingBookings) {
          for(const room of booking.rooms) {
+            if (roomsTypes[room.roomType] === undefined) {
+               roomsTypes[room.roomType] = 0;
+            }
             roomsTypes[room.roomType] += room.count;
          }
       }
