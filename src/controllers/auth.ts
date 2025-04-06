@@ -116,9 +116,10 @@ export const getMe = async (
   next: NextFunction,
 ) => {
   if (!req.user || !req.user.id) {
-    return res
+    res
       .status(401)
       .json({ success: false, msg: 'Not authorized to access this resource' });
+    return;
   }
   const user = await User.findById(req.user.id);
   res.status(200).json({
