@@ -17,7 +17,7 @@ export async function getHotels(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -39,7 +39,7 @@ export async function getHotel(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -54,7 +54,7 @@ export async function addHotel(
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -69,7 +69,7 @@ export async function updateHotel(
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -83,6 +83,6 @@ export async function deleteHotel(
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }

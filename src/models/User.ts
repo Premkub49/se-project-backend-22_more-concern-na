@@ -14,6 +14,7 @@ export interface IUser {
   email: string;
   password: string;
   role: string;
+  hotel: ObjectId;
   point: number;
   inventory: UserRedeemable[];
   resetPasswordToken?: string;
@@ -62,6 +63,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'admin', 'hotelManager'],
     default: 'user',
+  },
+  hotel: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"Hotel"
   },
   point: {
     type: Number,
