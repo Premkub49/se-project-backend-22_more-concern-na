@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
 import Hotel, { IHotel } from 'models/Hotel';
-import { updateRemainRoomHotel } from './hotels';
+import { updateRemainRoomsHotel } from './hotels';
 
 function checkDayValid(
    start: string,
@@ -79,7 +79,7 @@ export async function addBooking(
 
       await Booking.create(booking);
 
-      await updateRemainRoomHotel(hotel, booking.rooms, false);
+      await updateRemainRoomsHotel(hotel, booking.rooms, false);
 
       res.status(201).json({
          success: true,

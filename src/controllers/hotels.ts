@@ -74,7 +74,7 @@ export async function updateHotel(
   }
 }
 
-export async function updateRemainRoomHotel(
+export async function updateRemainRoomsHotel(
   hotel: IHotel,
   booking: BookingType[],
   type: boolean = false // true: add, false: remove
