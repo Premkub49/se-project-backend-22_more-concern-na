@@ -74,24 +74,6 @@ export async function updateHotel(
   }
 }
 
-export async function updateRemainRoomsHotel(
-  hotel: IHotel,
-  booking: BookingType[],
-  type: boolean = false // true: add, false: remove
-) {
-  booking.forEach((room) => {
-    hotel.rooms.find((r) => {
-      r.roomType === room.roomType
-      if(type)
-        r.remainCount += room.count;
-      else
-        r.remainCount -= room.count;
-    })
-  });
-
-  await Hotel.updateOne({ _id: hotel._id }, hotel)
-}
-
 export async function deleteHotel(
   req: Request,
   res: Response,

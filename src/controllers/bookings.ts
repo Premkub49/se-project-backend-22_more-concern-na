@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 
 import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
 import Hotel, { IHotel } from 'models/Hotel';
-import { updateRemainRoomsHotel } from './hotels';
 
 function checkDayValid(
    start: string,
@@ -164,7 +163,6 @@ export async function addBooking(
 
       await Booking.create(booking);
 
-      await updateRemainRoomsHotel(hotel, booking.rooms, false);
 
       res.status(201).json({
          success: true,
@@ -232,8 +230,6 @@ export async function updateBooking(
       newBooking.price = price;
 
       await Booking.updateOne({ _id: bookingId }, newBooking);
-      await updateRemainRoomsHotel(hotel, booking.rooms, true);
-      await updateRemainRoomsHotel(hotel, newBooking.rooms, false);
    }
    catch (err) {
       console.log(err);
@@ -270,8 +266,6 @@ export async function deleteBooking(
       }
 
       await Booking.deleteOne({ _id: bookingId });
-
-      await updateRemainRoomsHotel(hotel, booking.rooms, true);
 
       res.status(200).json({
          success: true,
