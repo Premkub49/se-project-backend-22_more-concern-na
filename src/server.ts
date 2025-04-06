@@ -19,6 +19,11 @@ app.use('/bookings', bookings);
 
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 5050;
-app.listen(PORT, () => {
-  console.log(`Server is running on ${HOST}:${PORT}`);
-});
+if (process.env.NODE_ENV === "production") {
+  module.exports = app;
+}
+else if (process.env.NODE_ENV === "development"){
+  app.listen(PORT, () => {
+    console.log(`Server is running on ${HOST}:${PORT}`);
+  });
+}
