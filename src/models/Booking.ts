@@ -1,31 +1,30 @@
-import mongoose, { model } from "mongoose";
-
+import mongoose, { ObjectId } from "mongoose";
 interface BookingType{
     roomType: string,
     count: number
 }
 export interface IBooking {
-    _id: mongoose.Schema.Types.ObjectId;
-    user:mongoose.Schema.Types.ObjectId,
-    hotel: mongoose.Schema.Types.ObjectId,
+    _id: ObjectId,
+    user: ObjectId,
+    hotel: ObjectId,
     status: string,
     price: number,
     startDate: Date,
     endDate: Date,
-    rooms: BookingType[]
-
+    rooms: BookingType[],
+    createdAt: Date
 }
 
 const BookingSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true,
+        required: [true, "Please add a user id"],
     },
     hotel: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Hotel",
-        required: true,
+        required: [true, "Please add a hotel id"],
     },
     status: {
         type: String,
@@ -38,16 +37,14 @@ const BookingSchema = new mongoose.Schema({
     },
     startDate: {
         type: Date,
-        required: true,
+        required: [true, "Please add a start date"],
     },
     endDate: {
         type: Date,
-        required: true,
+        required: [true, "Please add an end date"],
     },
     rooms: {
-        type: Array,
-        required: true,
-        properties: {
+        type: [{
             roomType: {
                 type: String,
                 required: [true, "Please add a room type"],
@@ -56,7 +53,8 @@ const BookingSchema = new mongoose.Schema({
                 type: Number,
                 required: [true, "Please add a number of rooms"],
             },
-        }
+        }],
+        required: true,
     },
     createdAt: {
         type: Date,

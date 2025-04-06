@@ -1,14 +1,13 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
-import {IRedeemable} from './Redeemable';
-
-export interface AuthRequest extends Request {
-  user?: any;
+import mongoose,{ ObjectId } from 'mongoose';
+interface UserRedeemable {
+  redeemableId: ObjectId;
+  count: number;
 }
-
-export interface IUser {
-  _id: mongoose.Schema.Types.ObjectId,
+export interface IUser{
+  _id: ObjectId,
+  id?: ObjectId,
   name: string;
   tel: string;
   picture?: string;
@@ -16,12 +15,12 @@ export interface IUser {
   password: string;
   role: string;
   point: number;
-  inventory:IRedeemable[];
-  resetPasswordToken: string;
-  resetPasswordExpired: Date;
+  inventory:UserRedeemable[];
+  resetPasswordToken?: string;
+  resetPasswordExpired?: Date;
   createdAt: Date;
-  getSignedJwtToken: Function;
-  matchPassword: Function;
+  getSignedJwtToken: () => string;
+  matchPassword: (enteredPassword: string)=> Promise<boolean>;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -34,6 +33,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a telephone number'],
     match: [/^[0-9]{10}$/, 'Please add a valid tel_number'],
+    trim: true
   },
   picture: {
     type: String,
@@ -46,6 +46,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide an email'],
     unique: true,
+    lowercase: true,
     match: [
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       'Please provide a valid email',
@@ -67,10 +68,16 @@ const UserSchema = new mongoose.Schema({
     default: 0,
   },
   inventory:{
-    type: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Redeemable',
-    }],
+    type: [
+      {
+        redeemableId:{
+          type: mongoose.Schema.Types.ObjectId,
+        },
+        count: {
+          type: Number
+        }
+      }
+    ],
     default: [],
   },
   resetPasswordToken: String,
@@ -83,8 +90,12 @@ const UserSchema = new mongoose.Schema({
 
 //Use salt to hash password
 UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 //Sign JWT and return
