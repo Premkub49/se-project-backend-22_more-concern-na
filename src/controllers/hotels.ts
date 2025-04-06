@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import Hotel from '../models/Hotel';
+import Hotel, { IHotel } from '../models/Hotel';
+import { BookingType } from 'models/Booking';
 export async function getHotels(
   req: Request,
   res: Response,
@@ -71,6 +72,24 @@ export async function updateHotel(
     console.log(err);
     res.sendStatus(500);
   }
+}
+
+export async function updateRemainRoomHotel(
+  hotel: IHotel,
+  booking: BookingType[],
+  type: boolean = false // true: add, false: remove
+) {
+  booking.forEach((room) => {
+    hotel.rooms.find((r) => {
+      r.roomType === room.roomType
+      if(type)
+        r.remainCount += room.count;
+      else
+        r.remainCount -= room.count;
+    })
+  });
+
+  await Hotel.updateOne({ _id: hotel._id }, hotel)
 }
 
 export async function deleteHotel(
