@@ -45,7 +45,8 @@ export const register = async (
       password,
       role,
     });
-    sendTokenResponse(user, 200, res);
+    sendTokenResponse(user as unknown as IUser, 200, res);
+    return;
   } catch (err: any) {
     const message = errMongoChecker(err);
     res.status(400).json({ success: false, msg: message });
@@ -61,21 +62,25 @@ export const login = async (
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
+    res
       .status(400)
       .json({ success: false, msg: 'Please provide an email and password' });
+    return;
   }
 
   const user: IUser | null = await User.findOne({ email }).select('+password');
   if (!user) {
-    return res.status(400).json({ success: false, msg: 'Invalid credentials' });
+    res.status(400).json({ success: false, msg: 'Invalid credentials' });
+    return;
   }
   if (!user.matchPassword) {
-    return res.sendStatus(500);
+    res.status(500).json({success: false, msg: "Server Error"});
+    return;
   }
   const isMatch = await user.matchPassword(password);
   if (!isMatch) {
-    return res.status(401).json({ success: false, msg: 'Invalid credentials' });
+    res.status(401).json({ success: false, msg: 'Invalid credentials' });
+    return;
   }
 
   sendTokenResponse(user, 200, res);
@@ -93,7 +98,7 @@ export const logout = async (
   res.status(200).json({ success: true, token: '' });
 };
 
-const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
+const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   const token = user.getSignedJwtToken();
   const options: IOption = {
     expires: new Date(
@@ -116,9 +121,10 @@ export const getMe = async (
   next: NextFunction,
 ) => {
   if (!req.user || !req.user.id) {
-    return res
+    res
       .status(401)
       .json({ success: false, msg: 'Not authorized to access this resource' });
+    return;
   }
   const user = await User.findById(req.user.id);
   res.status(200).json({
