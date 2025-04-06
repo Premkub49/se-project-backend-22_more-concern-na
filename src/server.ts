@@ -1,9 +1,9 @@
 import { configDotenv } from 'dotenv';
 import express, { Express } from 'express';
 import morgan from 'morgan';
-import auth from 'routes/auth';
-import bookings from 'routes/bookings';
-import hotels from 'routes/hotels';
+import auth from './routes/auth';
+import bookings from './routes/bookings';
+import hotels from './routes/hotels';
 import connectDB from './config/db';
 
 configDotenv({ path: '.env' });
