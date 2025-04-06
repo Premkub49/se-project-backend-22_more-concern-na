@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
 
-export const protect: any = async (
+export const protect: RequestHandler = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -17,9 +17,10 @@ export const protect: any = async (
   }
 
   if (!token) {
-    return res
+    res
       .status(401)
       .json({ success: false, message: 'Not authorized to access this route' });
+    return;
   }
 
   try {
@@ -38,10 +39,10 @@ export const protect: any = async (
     req.user = user as unknown as IUser;
     next();
   } catch (err) {
-    console.log(err);
-    return res
+    res
       .status(401)
       .json({ success: false, message: 'Not authorize to access this route' });
+    return;
   }
 };
 

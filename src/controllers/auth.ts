@@ -45,7 +45,7 @@ export const register = async (
       password,
       role,
     });
-    sendTokenResponse(user, 200, res);
+    sendTokenResponse(user as unknown as IUser, 200, res);
   } catch (err: any) {
     const message = errMongoChecker(err);
     res.status(400).json({ success: false, msg: message });
@@ -93,7 +93,7 @@ export const logout = async (
   res.status(200).json({ success: true, token: '' });
 };
 
-const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
+const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   const token = user.getSignedJwtToken();
   const options: IOption = {
     expires: new Date(
