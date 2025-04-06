@@ -103,7 +103,7 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   const options: IOption = {
     expires: new Date(
       Date.now() +
-        (process.env.JWT_COOKIE_EXPIRE as any as number) * 24 * 60 * 60 * 1000,
+        (Number(process.env.JWT_COOKIE_EXPIRE) || 30) * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
   };
