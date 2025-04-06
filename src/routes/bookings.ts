@@ -4,7 +4,7 @@ import {
   getBooking,
   getBookings,
   updateBooking,
-} from 'controllers/bookings';
+} from '../controllers/bookings';
 import express from 'express';
 import { protect } from '../middleware/auth';
 

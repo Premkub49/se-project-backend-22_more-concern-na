@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import Hotel, { IHotel, Rooms } from 'models/Hotel';
+import Hotel, { IHotel, Rooms } from '../models/Hotel';
 import Booking, { IBooking, PBooking } from '../models/Booking';
 
 function checkDayValid(start: string, end: string, res?: Response) {
