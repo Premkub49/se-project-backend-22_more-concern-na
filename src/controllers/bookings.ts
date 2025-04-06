@@ -173,6 +173,7 @@ export async function addBooking(
       console.log(err);
       res.sendStatus(500);
    }
+}
 
 export async function updateBooking(
    req: Request,
