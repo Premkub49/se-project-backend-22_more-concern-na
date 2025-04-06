@@ -14,6 +14,6 @@ export async function getUsers(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }

@@ -30,50 +30,52 @@ export interface PBooking {
 }
 
 const BookingSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: [true, "Please add a user id"],
-    },
-    hotel: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Hotel",
-        required: [true, "Please add a hotel id"],
-    },
-    status: {
-        type: String,
-        enum: ["reserved", "checkedIn", "completed"],
-        default: "reserved",
-    },
-    price: {
-        type: Number,
-        required: [true, "Please add a price"]
-    },
-    startDate: {
-        type: Date,
-        required: [true, "Please add a start date"],
-    },
-    endDate: {
-        type: Date,
-        required: [true, "Please add an end date"],
-    },
-    rooms: {
-        type: [{
-            roomType: {
-                type: String,
-                required: [true, "Please add a room type"],
-            },
-            count: {
-                type: Number,
-                required: [true, "Please add a number of rooms"],
-            },
-        }],
-        required: true,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now(),
-    },
-})
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: [true, 'Please add a user id'],
+  },
+  hotel: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Hotel',
+    required: [true, 'Please add a hotel id'],
+  },
+  status: {
+    type: String,
+    enum: ['reserved', 'checkedIn', 'completed'],
+    default: 'reserved',
+  },
+  price: {
+    type: Number,
+    required: [true, 'Please add a price'],
+  },
+  startDate: {
+    type: Date,
+    required: [true, 'Please add a start date'],
+  },
+  endDate: {
+    type: Date,
+    required: [true, 'Please add an end date'],
+  },
+  rooms: {
+    type: [
+      {
+        roomType: {
+          type: String,
+          required: [true, 'Please add a room type'],
+        },
+        count: {
+          type: Number,
+          required: [true, 'Please add a number of rooms'],
+        },
+      },
+    ],
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+});
 
-export default mongoose.model('Booking',BookingSchema);
+export default mongoose.model('Booking', BookingSchema);
