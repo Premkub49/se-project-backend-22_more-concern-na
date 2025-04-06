@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import Hotel, { IHotel } from '../models/Hotel';
-import { BookingType } from 'models/Booking';
+import Hotel from '../models/Hotel';
 export async function getHotels(
   req: Request,
   res: Response,

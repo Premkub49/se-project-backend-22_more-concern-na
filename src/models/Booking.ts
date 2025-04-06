@@ -1,32 +1,32 @@
-import mongoose, { ObjectId } from "mongoose";
-import { IUser } from "./User";
-import { IHotel } from "./Hotel";
-export interface BookingType{
-    roomType: string,
-    count: number
+import mongoose, { ObjectId } from 'mongoose';
+import { IHotel } from './Hotel';
+import { IUser } from './User';
+export interface BookingType {
+  roomType: string;
+  count: number;
 }
 export interface IBooking {
-    _id: ObjectId,
-    user: ObjectId,
-    hotel: ObjectId,
-    status: string,
-    price: number,
-    startDate: Date,
-    endDate: Date,
-    rooms: BookingType[],
-    createdAt: Date
+  _id: ObjectId;
+  user: ObjectId;
+  hotel: ObjectId;
+  status: string;
+  price: number;
+  startDate: Date;
+  endDate: Date;
+  rooms: BookingType[];
+  createdAt: Date;
 }
 
 export interface PBooking {
-    _id: ObjectId,
-    user: IUser,
-    hotel: IHotel,
-    status: string,
-    price: number,
-    startDate: Date,
-    endDate: Date,
-    rooms: BookingType[],
-    createdAt: Date
+  _id: ObjectId;
+  user: IUser;
+  hotel: IHotel;
+  status: string;
+  price: number;
+  startDate: Date;
+  endDate: Date;
+  rooms: BookingType[];
+  createdAt: Date;
 }
 
 const BookingSchema = new mongoose.Schema({
