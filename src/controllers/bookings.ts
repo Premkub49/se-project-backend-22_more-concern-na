@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
-import Hotel, { IHotel } from 'models/Hotel';
+import Hotel, { IHotel, Rooms } from 'models/Hotel';
 
 function checkDayValid(
    start: string,
@@ -143,23 +143,43 @@ export async function addBooking(
          return;
       }
 
-      for(const room of rooms) {
-         const roomType = hotel.rooms.find((r) => r.roomType === room.roomType);
+      const conflictingBookings = await Booking.find({
+         hotel: booking.hotel,
+         $or: [
+            {
+               startDate: { $lte: booking.endDate },
+               endDate: { $gte: booking.startDate },
+            },
+         ],
+      });
 
+      let roomsTypes: Record<string, number> = {};
+      for(const booking of conflictingBookings) {
+         for(const room of booking.rooms) {
+            roomsTypes[room.roomType] += room.count;
+         }
+      }
+
+      for(const room of rooms) {
+         const roomType: Rooms|null = hotel.rooms.find(r => r.roomType === room.roomType) as Rooms|null;
+         
          if(!roomType) {
             res.status(400).json({ success: false, msg: 'Please add valid room type' });
             return;
          }
-         
-         if(room.count > roomType.remainCount) {
+
+         if (roomType && roomsTypes[room.roomType] + room.count > roomType.maxCount) {
             res.status(400).json({ success: false, msg: 'Not enough room' });
             return;
          }
-
+         
          price += room.count * roomType.price;
       }
 
-      booking.price = price;
+      const dayDifference = Math.ceil(
+         (booking.endDate.getTime() - booking.startDate.getTime()) / (24 * 60 * 60 * 1000));
+
+      booking.price = price * (dayDifference + 1);
 
       await Booking.create(booking);
 
@@ -210,24 +230,45 @@ export async function updateBooking(
       let price = 0;
       const rooms = newBooking.rooms;
 
-      for(const room of rooms) {
-         const roomType = hotel.rooms.find((r) => r.roomType === room.roomType);
-         const oldRoom = booking.rooms.find((r) => r.roomType === room.roomType);
+      const conflictingBookings = await Booking.find({
+         hotel: booking.hotel,
+         _id: { $ne: bookingId },
+         $or: [
+            {
+               startDate: { $lte: booking.endDate },
+               endDate: { $gte: booking.startDate },
+            },
+         ],
+      });
 
+      let roomsTypes: Record<string, number> = {};
+      for(const booking of conflictingBookings) {
+         for(const room of booking.rooms) {
+            roomsTypes[room.roomType] += room.count;
+         }
+      }
+
+      for(const room of rooms) {
+         const roomType: Rooms|null = hotel.rooms.find(r => r.roomType === room.roomType) as Rooms|null;
+         
          if(!roomType) {
             res.status(400).json({ success: false, msg: 'Please add valid room type' });
             return;
          }
-         
-         if(room.count > roomType.remainCount + (oldRoom? oldRoom.count: 0)) {
+
+         if (roomType && roomsTypes[room.roomType] + room.count > roomType.maxCount) {
             res.status(400).json({ success: false, msg: 'Not enough room' });
             return;
          }
-
+         
          price += room.count * roomType.price;
       }
 
-      newBooking.price = price;
+      const dayDifference = Math.ceil(
+         (booking.endDate.getTime() - booking.startDate.getTime()) / (24 * 60 * 60 * 1000));
+         
+      newBooking.price = price * (dayDifference + 1);
+      
 
       await Booking.updateOne({ _id: bookingId }, newBooking);
    }
