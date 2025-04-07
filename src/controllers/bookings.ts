@@ -100,13 +100,14 @@ export async function getBooking(
       return;
     }
 
-    // if(req.user.role === 'hotelManager') {
-    //    const hotel: IHotel|null = await Hotel.findById(booking.hotel);
-    //    if(!hotel) {
-    //       return res.status(404).json({ success: false, msg: 'Not Found Hotel' });
-    //    }
-
-    // }
+    if (req.user.role === 'hotelManager') {
+      if (booking.hotel._id !== req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorize to access this route' });
+        return;
+      }
+    }
 
     if (req.user.role !== 'admin' && booking.user._id !== req.user._id) {
       res
@@ -121,7 +122,7 @@ export async function getBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
