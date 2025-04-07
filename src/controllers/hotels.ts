@@ -60,7 +60,7 @@ export async function getHotels(
     const total = await Hotel.countDocuments();
     query = query.skip(startIndex).limit(limit);
 
-    const hotel = await query;
+    const hotels = await query;
 
     // executing pagination
     const pagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
@@ -69,7 +69,7 @@ export async function getHotels(
 
     res
       .status(200)
-      .json({ success: true, count: hotel.length, pagination, data: hotel });
+      .json({ success: true, count: hotels.length, pagination, data: hotels });
   } catch (err:any) {
     if (err.message) {
       res.status(400).json({ success: false, msg: err.message });
@@ -193,6 +193,6 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
     res.status(200).json({success:true, rooms:returnRooms});
   }catch(err:any){
     console.log(err);
-    res.status(500).json({success:false, Msg:"Server Error"});
+    res.status(500).json({success:false, msg:"Server Error"});
   }
 }
