@@ -116,7 +116,6 @@ export async function getBooking(
       }
     }
 
-    console.log(booking.user._id, req.user._id, booking.user._id === req.user._id);
     if (req.user.role !== 'admin' && booking.user._id.toString() !== req.user._id.toString()) {
       res
         .status(401)
