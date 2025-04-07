@@ -1,23 +1,81 @@
 import { NextFunction, Request, Response } from 'express';
-import Hotel from '../models/Hotel';
+import Hotel, { IHotel } from '../models/Hotel';
+import Booking from '../models/Booking';
+import mongoose from 'mongoose';
+
+function noSQLInjection(data:object | string) {
+  let dataStr = JSON.stringify(data);
+    dataStr = dataStr.replace(
+      /\b(gt|gte|lt|lte|in)\b/g,
+      (match) => `$${match}`,
+    );
+  const dataJSON = JSON.parse(dataStr);
+  return dataJSON;
+}
+
 export async function getHotels(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const hotels = await Hotel.find();
-    if (!hotels) {
-      res.status(404).json({ success: false, msg: 'Not Found Hotel' });
-      return;
+    let query;
+    const reqQuery = {...req.query};
+    const removeFields = ["select", "sort", "page", "limit"];
+    removeFields.forEach((param)=> delete reqQuery[param]);
+    const filters = await noSQLInjection(reqQuery);
+
+    if (typeof req.query.name === "string" && req.query.name.trim() !== "") {
+      filters.name = { $regex: req.query.name, $options: "i" };
     }
-    res.status(200).json({
-      success: true,
-      hotels: hotels,
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+
+    if (typeof req.query.province === "string" && req.query.province.trim() !== "") {
+      filters.province = {
+        $regex: req.query.province,
+        $options: "i",
+      };
+    }
+
+    query = Hotel.find(filters);
+
+    // projection
+    if (typeof req.query.select === "string") {
+      const fields = req.query.select.split(",").join(" ");
+      query = query.select(fields);
+    }
+
+    // sort
+    if (typeof req.query.sort === "string") {
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createdAt");
+    }
+
+    // pagination
+    const page = typeof req.query.page === 'string' ? parseInt(req.query.page, 10) : 1;
+    const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit, 10) : 25;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const total = await Hotel.countDocuments();
+    query = query.skip(startIndex).limit(limit);
+
+    const hotel = await query;
+
+    // executing pagination
+    const pagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
+    if (endIndex < total) pagination.next = { page: page + 1, limit };
+    if (startIndex > 0) pagination.prev = { page: page - 1, limit };
+
+    res
+      .status(200)
+      .json({ success: true, count: hotel.length, pagination, data: hotel });
+  } catch (err:any) {
+    if (err.message) {
+      res.status(400).json({ success: false, msg: err.message });
+    } else {
+      res.status(500).json({ success: false, msg: "Server Error" });
+    }
   }
 }
 
@@ -84,5 +142,57 @@ export async function deleteHotel(
   } catch (err) {
     console.log(err);
     res.status(500).json({success:false, msg:"Server error"});
+  }
+}
+
+export async function checkAvailable(req:Request, res:Response, next: NextFunction){
+  try{
+    const reqQuery = {...req.query};
+    const query = await noSQLInjection(reqQuery);
+    const hotelId:string = await noSQLInjection(req.params.id);
+    const checkIn = new Date(query.checkin)
+    const checkOut = new Date(query.checkout)
+    const checkinUTC = new Date(checkIn.getTime() - (checkIn.getTimezoneOffset() * 60000));
+  const checkoutUTC = new Date(checkOut.getTime() - (checkOut.getTimezoneOffset() * 60000));
+    const roomsUsed =  await Booking.aggregate([
+      {
+        $match: {
+          hotel: new mongoose.Types.ObjectId(hotelId),
+          status:{$in:["reserved", "checkedIn"]},
+          startDate: {$gte:checkinUTC,$lte:checkoutUTC},
+          endDate:  {$gte:checkinUTC,$lte:checkoutUTC}
+        }
+      },
+      {
+        $unwind: "$rooms"
+      },
+      {
+        $group: {
+          _id: "$rooms.roomType",
+          totalCount: { $sum: "$rooms.count" }
+        }
+      },
+      {
+        $project: {
+          type: "$_id", 
+          sumCount: "$totalCount", 
+          _id: 0
+        }
+      }
+    ])
+    const hotel = await Hotel.find({_id:hotelId});
+    const rooms = hotel[0].rooms;
+    let returnRooms: { type: string; remainCount: number }[] = [];
+    for(let i=0;i<rooms.length;i++){
+      returnRooms.push({type: rooms[i].roomType,remainCount: rooms[i].maxCount});
+      const index = roomsUsed.findIndex(({type})=>type===rooms[i].roomType);
+      if(index !== -1){
+        returnRooms[i].remainCount = returnRooms[i].remainCount - roomsUsed[index].sumCount;
+      }
+    }
+    res.status(200).json({success:true, rooms:returnRooms});
+  }catch(err:any){
+    console.log(err);
+    res.status(500).json({success:false, Msg:"Server Error"});
   }
 }
