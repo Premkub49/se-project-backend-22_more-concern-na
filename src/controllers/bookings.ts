@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import Hotel, { IHotel, Rooms } from '../models/Hotel';
 import Booking, { IBooking, PBooking } from '../models/Booking';
+import Hotel, { IHotel, Rooms } from '../models/Hotel';
 
 function checkDayValid(start: string, end: string, res?: Response) {
   const startDate = new Date(start);
@@ -45,7 +45,12 @@ export async function getBookings(
         .populate(populateUser)
         .populate(populateHotel)) as any as PBooking[] | null;
     } else if (req.user.role === 'hotelManager') {
-      bookings = (await Booking.find()
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorize to access this route' });
+      }
+      bookings = (await Booking.find({ hotel: req.user.hotel })
         .populate(populateUser)
         .populate(populateHotel)) as any as PBooking[] | null;
     } else {
@@ -60,7 +65,7 @@ export async function getBookings(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
