@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import Hotel, { IHotel } from '../models/Hotel';
 import Booking from '../models/Booking';
 import mongoose from 'mongoose';
+import missingRequiredFields from './libs/resMsg';
 
 function noSQLInjection(data:object | string) {
   let dataStr = JSON.stringify(data);
@@ -97,7 +98,7 @@ export async function getHotel(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({success:false, msg:"Server Error"});
   }
 }
 
@@ -107,12 +108,15 @@ export async function addHotel(
   next: NextFunction,
 ) {
   try {
-    const reqBody = req.body;
-    await Hotel.insertOne(reqBody);
-    res.status(200).json({ success: true });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    const reqHotel:IHotel = req.body;
+    await Hotel.create(reqHotel);
+    res.status(201).json({ success: true });
+  } catch (err:any) {
+    if (err.message) {
+      res.status(400).json({ success: false, msg: err.message });
+    } else {
+      res.status(500).json({ success: false, msg: "Server Error" });
+    }
   }
 }
 
@@ -122,12 +126,18 @@ export async function updateHotel(
   next: NextFunction,
 ) {
   try {
-    const reqBody = req.body;
+    const reqBody:IHotel = req.body;
+    if(req.user && req.user.role === "hotelManager"){
+      if(req.params.id !== req.user.hotel as unknown as string){
+        res.status(400).json({success:false, msg:"It isn't your hotel get out."})
+        return;
+      }
+    }
     await Hotel.updateOne({ _id: req.params.id }, reqBody);
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({success:false, msg:"Server Error"});
   }
 }
 
@@ -141,7 +151,7 @@ export async function deleteHotel(
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({success:false, msg:"Server Error"});
   }
 }
 
