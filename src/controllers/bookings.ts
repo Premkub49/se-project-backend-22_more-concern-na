@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import Hotel, { IHotel, Rooms } from '../models/Hotel';
 import Booking, { IBooking, PBooking } from '../models/Booking';
+import Hotel, { IHotel, Rooms } from '../models/Hotel';
 
 function checkDayValid(start: string, end: string, res?: Response) {
   const startDate = new Date(start);
@@ -26,7 +26,7 @@ export async function getBookings(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -45,7 +45,13 @@ export async function getBookings(
         .populate(populateUser)
         .populate(populateHotel)) as any as PBooking[] | null;
     } else if (req.user.role === 'hotelManager') {
-      bookings = (await Booking.find()
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+      bookings = (await Booking.find({ hotel: req.user.hotel })
         .populate(populateUser)
         .populate(populateHotel)) as any as PBooking[] | null;
     } else {
@@ -60,7 +66,7 @@ export async function getBookings(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
@@ -73,7 +79,7 @@ export async function getBooking(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -95,18 +101,19 @@ export async function getBooking(
       return;
     }
 
-    // if(req.user.role === 'hotelManager') {
-    //    const hotel: IHotel|null = await Hotel.findById(booking.hotel);
-    //    if(!hotel) {
-    //       return res.status(404).json({ success: false, msg: 'Not Found Hotel' });
-    //    }
-
-    // }
+    if (req.user.role === 'hotelManager') {
+      if (booking.hotel._id !== req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+    }
 
     if (req.user.role !== 'admin' && booking.user._id !== req.user._id) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -116,7 +123,7 @@ export async function getBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
@@ -126,7 +133,7 @@ export async function addBooking(
   next: NextFunction,
 ) {
   try {
-    if(!req.body.user){
+    if (!req.body.user) {
       req.body.user = req.user?._id;
     }
     const booking: IBooking = req.body;
@@ -215,7 +222,7 @@ export async function addBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
@@ -228,7 +235,7 @@ export async function updateBooking(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -244,7 +251,7 @@ export async function updateBooking(
     if (req.user.role !== 'admin' && booking.user !== req.user._id) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -326,7 +333,7 @@ export async function updateBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
@@ -339,7 +346,7 @@ export async function deleteBooking(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
     const bookingId = req.params.id;
@@ -352,7 +359,7 @@ export async function deleteBooking(
     if (req.user.role !== 'admin' && booking.user !== req.user._id) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -369,6 +376,6 @@ export async function deleteBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
