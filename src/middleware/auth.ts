@@ -19,7 +19,7 @@ export const protect: RequestHandler = async (
   if (!token) {
     res
       .status(401)
-      .json({ success: false, message: 'Not authorized to access this route' });
+      .json({ success: false, msg: 'Not authorized to access this route' });
     return;
   }
 
@@ -41,7 +41,7 @@ export const protect: RequestHandler = async (
   } catch (err) {
     res
       .status(401)
-      .json({ success: false, message: 'Not authorize to access this route' });
+      .json({ success: false, msg: 'Not authorize to access this route' });
     return;
   }
 };
@@ -51,14 +51,14 @@ export const authorize = (...roles: any[]) => {
     if (!req.user){
       res.status(401).json({
         success: false,
-        message: 'User is not authenticated',
+        msg: 'User is not authenticated',
       });
       return;
     }
     if (!roles.includes(req.user.role)) {
       res.status(403).json({
         success: false,
-        message: `User role ${req.user.role} is not authorized to access this route`,
+        msg: `User role ${req.user.role} is not authorized to access this route`,
       });
       return;
     }
