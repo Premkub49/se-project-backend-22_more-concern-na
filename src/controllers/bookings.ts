@@ -60,7 +60,7 @@ export async function getBookings(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -116,7 +116,7 @@ export async function getBooking(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -126,9 +126,17 @@ export async function addBooking(
   next: NextFunction,
 ) {
   try {
+    if(!req.body.user){
+      req.body.user = req.user?._id;
+    }
     const booking: IBooking = req.body;
     let price = 0;
-
+    if (!(booking.endDate instanceof Date)) {
+      booking.endDate = new Date(booking.endDate);
+    }
+    if (!(booking.startDate instanceof Date)) {
+      booking.startDate = new Date(booking.startDate);
+    }
     if (
       !checkDayValid(
         booking.startDate.toString(),
@@ -207,7 +215,7 @@ export async function addBooking(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -318,7 +326,7 @@ export async function updateBooking(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
 
@@ -361,6 +369,6 @@ export async function deleteBooking(
     });
   } catch (err) {
     console.log(err);
-    res.sendStatus(500);
+    res.status(500).json({success:false, msg:"Server error"});
   }
 }
