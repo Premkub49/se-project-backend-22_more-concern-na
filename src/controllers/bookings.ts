@@ -93,7 +93,7 @@ export async function getBooking(
       select: 'name picture ratingSum ratingCount',
     };
     const booking: PBooking | null = (await Booking.findById(
-      bookingId,
+      bookingId
     ).populate(populateHotel)) as any as PBooking | null;
 
     if (!booking) {
@@ -102,15 +102,21 @@ export async function getBooking(
     }
 
     if (req.user.role === 'hotelManager') {
-      if (booking.hotel._id !== req.user.hotel) {
+      if (booking.hotel._id.toString() !== req.user.hotel.toString()) {
         res
           .status(401)
           .json({ success: false, msg: 'Not authorized to access this route' });
         return;
       }
+      else {
+        res
+          .status(200)
+          .json({ success: true, booking: booking });
+        return;
+      }
     }
 
-    if (req.user.role !== 'admin' && booking.user._id !== req.user._id) {
+    if (req.user.role !== 'admin' && booking.user._id.toString() !== req.user._id.toString()) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
@@ -215,6 +221,8 @@ export async function addBooking(
 
     booking.price = price * (dayDifference + 1);
 
+    booking.status = 'reserved';
+
     await Booking.create(booking);
 
     res.status(201).json({
@@ -248,7 +256,7 @@ export async function updateBooking(
       return;
     }
 
-    if (req.user.role !== 'admin' && booking.user !== req.user._id) {
+    if (req.user.role !== 'admin' && booking.user.toString() !== req.user._id.toString()) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
@@ -356,7 +364,7 @@ export async function deleteBooking(
       return;
     }
 
-    if (req.user.role !== 'admin' && booking.user !== req.user._id) {
+    if (req.user.role !== 'admin' && booking.user.toString() !== req.user._id.toString()) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
