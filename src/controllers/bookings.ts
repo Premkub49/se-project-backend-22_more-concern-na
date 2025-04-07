@@ -26,7 +26,7 @@ export async function getBookings(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -48,7 +48,8 @@ export async function getBookings(
       if (!req.user.hotel) {
         res
           .status(401)
-          .json({ success: false, msg: 'Not authorize to access this route' });
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
       }
       bookings = (await Booking.find({ hotel: req.user.hotel })
         .populate(populateUser)
@@ -78,7 +79,7 @@ export async function getBooking(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -104,7 +105,7 @@ export async function getBooking(
       if (booking.hotel._id !== req.user.hotel) {
         res
           .status(401)
-          .json({ success: false, msg: 'Not authorize to access this route' });
+          .json({ success: false, msg: 'Not authorized to access this route' });
         return;
       }
     }
@@ -112,7 +113,7 @@ export async function getBooking(
     if (req.user.role !== 'admin' && booking.user._id !== req.user._id) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -234,7 +235,7 @@ export async function updateBooking(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -250,7 +251,7 @@ export async function updateBooking(
     if (req.user.role !== 'admin' && booking.user !== req.user._id) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
@@ -345,7 +346,7 @@ export async function deleteBooking(
     if (!req.user) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
     const bookingId = req.params.id;
@@ -358,7 +359,7 @@ export async function deleteBooking(
     if (req.user.role !== 'admin' && booking.user !== req.user._id) {
       res
         .status(401)
-        .json({ success: false, msg: 'Not authorize to access this route' });
+        .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
