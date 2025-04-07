@@ -109,7 +109,7 @@ UserSchema.methods.getSignedJwtToken = function () {
     throw new Error('JWT_SECRET is not defined');
   }
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: parseInt(process.env.JWT_EXPIRES as string ,10) * 24* 60 *60 *1000,
+    expiresIn: parseInt(process.env.JWT_EXPIRES as string ,10) * 24* 60 *60,
   });
 };
 

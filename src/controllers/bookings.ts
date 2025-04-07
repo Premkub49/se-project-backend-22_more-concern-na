@@ -225,7 +225,6 @@ export async function updateBooking(
   next: NextFunction,
 ) {
   try {
-    console.log(req.body.endDate);
     if (!req.user) {
       res
         .status(401)
