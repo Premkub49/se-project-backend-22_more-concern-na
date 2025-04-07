@@ -132,7 +132,7 @@ export async function addBooking(
   next: NextFunction,
 ) {
   try {
-    if(!req.body.user){
+    if (!req.body.user) {
       req.body.user = req.user?._id;
     }
     const booking: IBooking = req.body;
@@ -221,7 +221,7 @@ export async function addBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
@@ -332,7 +332,7 @@ export async function updateBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
 
@@ -375,6 +375,6 @@ export async function deleteBooking(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }
