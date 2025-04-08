@@ -146,7 +146,9 @@ export async function addBooking(
       return;
     }
 
-    req.body.user = req.user._id;
+    if(req.user.role !== 'user') {
+      req.body.user = req.user._id;
+    }
 
     if(req.params.hotelId) {
       req.body.hotel = req.params.hotelId;
