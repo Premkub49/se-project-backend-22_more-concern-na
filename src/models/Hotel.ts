@@ -91,10 +91,6 @@ const HotelSchema = new mongoose.Schema(
             type: Number,
             required: [true, 'Please add a maxCount'],
           },
-          remainCount: {
-            type: Number,
-            required: [true, 'Please add a remainingCount'],
-          },
           price: {
             type: Number,
             required: [true, 'Please add a price'],
