@@ -47,6 +47,7 @@ export async function checkRoomsValidAndCalculatePrice(
   hotel: IHotel,
   rooms: BookingType[],
   res: Response,
+  isUpdate: boolean = false,
 ): Promise<{ valid: boolean; price: number }> {
   if (!rooms || rooms.length === 0) {
     res.status(400).json({ success: false, msg: 'Please add room' });
@@ -54,15 +55,30 @@ export async function checkRoomsValidAndCalculatePrice(
   }
 
   let price = 0;
-  const conflictingBookings = await Booking.find({
-    hotel: booking.hotel,
-    $or: [
-      {
-        startDate: { $lte: booking.endDate },
-        endDate: { $gte: booking.startDate },
-      },
-    ],
-  });
+  let conflictingBookings: IBooking[] = [];
+  if(!isUpdate) {
+    conflictingBookings = await Booking.find({
+      hotel: booking.hotel,
+      $or: [
+        {
+          startDate: { $lte: booking.endDate },
+          endDate: { $gte: booking.startDate },
+        }
+      ]
+    });
+  }
+  else {
+    conflictingBookings = await Booking.find({
+      hotel: booking.hotel,
+      _id: { $ne: booking._id },
+      $or: [
+        {
+          startDate: { $lte: booking.endDate },
+          endDate: { $gte: booking.startDate },
+        }
+      ]
+    });
+  }
 
   let roomsTypes: Record<string, number> = {};
   for (const booking of conflictingBookings) {
@@ -347,6 +363,7 @@ export async function updateBooking(
         hotel,
         newBooking.rooms,
         res,
+        true
       );
     if (!valid) {
       return;
