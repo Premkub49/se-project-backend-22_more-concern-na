@@ -37,14 +37,8 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, email, tel, password, role } = req.body;
-    const user = await User.create({
-      name,
-      email,
-      tel,
-      password,
-      role,
-    });
+    const reqUser:IUser = req.body;
+    const user = await User.create(reqUser);
     sendTokenResponse(user as unknown as IUser, 200, res);
     return;
   } catch (err: any) {
