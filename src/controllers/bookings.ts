@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 
 import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
 import Hotel, { IHotel, Rooms } from '../models/Hotel';
-import { ObjectId } from 'mongoose';
 
 export function checkDayValid(start: string, end: string, res?: Response) {
   const startDate = new Date(start);
@@ -47,9 +46,9 @@ export async function checkRoomsValidAndCalculatePrice(
   booking: IBooking,
   hotel: IHotel,
   rooms: BookingType[],
-  res: Response
-): Promise<{ valid: boolean; price: number; }> {
-  if(!rooms || rooms.length === 0) {
+  res: Response,
+): Promise<{ valid: boolean; price: number }> {
+  if (!rooms || rooms.length === 0) {
     res.status(400).json({ success: false, msg: 'Please add room' });
     return { valid: false, price: 0 };
   }
@@ -184,7 +183,7 @@ export async function getBooking(
       select: 'name picture ratingSum ratingCount',
     };
     const booking: PBooking | null = (await Booking.findById(
-      bookingId
+      bookingId,
     ).populate(populateHotel)) as any as PBooking | null;
 
     if (!booking) {
@@ -198,16 +197,16 @@ export async function getBooking(
           .status(401)
           .json({ success: false, msg: 'Not authorized to access this route' });
         return;
-      }
-      else {
-        res
-          .status(200)
-          .json({ success: true, booking: booking });
+      } else {
+        res.status(200).json({ success: true, booking: booking });
         return;
       }
     }
 
-    if (req.user.role !== 'admin' && booking.user._id.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== 'admin' &&
+      booking.user._id.toString() !== req.user._id.toString()
+    ) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
@@ -230,22 +229,22 @@ export async function addBooking(
   next: NextFunction,
 ) {
   try {
-    if(!req.user) {
+    if (!req.user) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
 
-    if(req.user.role === 'user') {
+    if (req.user.role === 'user') {
       req.body.user = req.user._id;
     }
 
-    if(req.params.hotelId) {
+    if (req.params.hotelId) {
       req.body.hotel = req.params.hotelId;
     }
 
-    if(!checkBookingValid(req, res)) {
+    if (!checkBookingValid(req, res)) {
       return;
     }
 
@@ -271,7 +270,13 @@ export async function addBooking(
       return;
     }
 
-    const { valid, price: calculatedPrice } = await checkRoomsValidAndCalculatePrice(booking, hotel, booking.rooms, res);
+    const { valid, price: calculatedPrice } =
+      await checkRoomsValidAndCalculatePrice(
+        booking,
+        hotel,
+        booking.rooms,
+        res,
+      );
     if (!valid) {
       return;
     }
@@ -312,7 +317,10 @@ export async function updateBooking(
       return;
     }
 
-    if (req.user.role !== 'admin' && booking.user.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== 'admin' &&
+      booking.user.toString() !== req.user._id.toString()
+    ) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
@@ -336,7 +344,13 @@ export async function updateBooking(
     )
       return;
 
-    const { valid, price: calculatedPrice } = await checkRoomsValidAndCalculatePrice(newBooking, hotel, newBooking.rooms, res);
+    const { valid, price: calculatedPrice } =
+      await checkRoomsValidAndCalculatePrice(
+        newBooking,
+        hotel,
+        newBooking.rooms,
+        res,
+      );
     if (!valid) {
       return;
     }
@@ -373,7 +387,10 @@ export async function deleteBooking(
       return;
     }
 
-    if (req.user.role !== 'admin' && booking.user.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== 'admin' &&
+      booking.user.toString() !== req.user._id.toString()
+    ) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
