@@ -1,42 +1,5 @@
 // interface.ts
 
-// Request Query Interface
-interface HotelReviewsQuery {
-    selfPage: number; // (offset = (page - 1) * limit)
-    selfPageSize: number; // limit
-    otherPage: number;
-    otherPageSize: number;
-}
-
-// Response Interfaces
-interface ReviewPagination {
-    prev?: number;
-    next?: number;
-    count: number; // count data that query after offset
-}
-
-interface Review {
-    userName: string;
-    picture: string;
-    stayMonth: Date;
-    stayRoom: string;
-    title: string;
-    rating: number;
-    text?: string;
-    replyText?: string;
-}
-
-interface ReviewResponseSection {
-    pagination: ReviewPagination;
-    data: Review[];
-}
-
-interface HotelReviewsResponse {
-    self: ReviewResponseSection;
-    other: ReviewResponseSection; // same as self
-}
-
-
 // ---------- Shared Types ----------
 interface RoomAvailability {
     type: string;
