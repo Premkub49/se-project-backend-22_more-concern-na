@@ -86,10 +86,7 @@ export async function checkRoomsValidAndCalculatePrice(
       return { valid: false, price: 0 };
     }
 
-    if (
-      roomType &&
-      roomsTypes[room.roomType] + room.count > roomType.maxCount
-    ) {
+    if (roomsTypes[room.roomType] + room.count > roomType.maxCount) {
       res.status(400).json({ success: false, msg: 'Not enough room' });
       return { valid: false, price: 0 };
     }
