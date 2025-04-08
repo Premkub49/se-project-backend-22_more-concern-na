@@ -146,7 +146,7 @@ export async function addBooking(
       return;
     }
 
-    if(req.user.role !== 'user') {
+    if(req.user.role === 'user') {
       req.body.user = req.user._id;
     }
 
