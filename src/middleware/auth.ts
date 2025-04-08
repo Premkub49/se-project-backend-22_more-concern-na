@@ -41,7 +41,7 @@ export const protect: RequestHandler = async (
   } catch (err) {
     res
       .status(401)
-      .json({ success: false, msg: 'Not authorize to access this route' });
+      .json({ success: false, msg: 'Not authorized to access this route' });
     return;
   }
 };
