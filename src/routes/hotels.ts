@@ -1,8 +1,11 @@
 import express from 'express';
 import { addHotel, checkAvailable, deleteHotel, getHotel, getHotels, updateHotel } from '../controllers/hotels';
 import { authorize, protect } from '../middleware/auth';
+import bookingRouter from './bookings';
 
 const router = express.Router();
+
+router.use('/:hotelId/bookings', bookingRouter);
 
 router.route('/').get(getHotels).post(protect,authorize("admin"), addHotel);
 router.route('/:id')
