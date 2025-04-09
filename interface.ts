@@ -80,17 +80,12 @@ interface UpdateReviewBody {
     rating: number;
 }
 
-interface UpdateReviewResponse extends GenericResponse{
-}
-// ---------- DELETE /reviews/:id ----------
-interface DeleteReviewResponse extends GenericResponse{
-}
+
+
 // ---------- POST /reports ----------
 interface CreateReportBody {
     reviewId: string;
     reason: string;
-}
-interface CreateReportResponse extends GenericResponse{
 }
 
 
@@ -165,8 +160,7 @@ interface BookingsRequest {
         numberOfRoom: number;
     }[];
 }
-interface BookingsResponse extends GenericResponse{
-}
+
 
 // ---------- Hotels Request ----------
 interface HotelAddress {
@@ -193,8 +187,7 @@ interface HotelsRequest {
     rooms: HotelRoom[];
 }
 
-interface HotelsResponse extends GenericResponse{
-}
+
 
 //---------GET /bookings-----------
 interface BookingQuery {
@@ -230,5 +223,3 @@ interface BookingResponse extends GenericResponse{
     past: BookingData;
 }
 
-interface DeleteBookingResponse  extends GenericResponse{
-}

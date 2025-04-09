@@ -1,5 +1,7 @@
 import mongoose, { ObjectId } from 'mongoose';
-interface BookingType {
+import { IHotel } from './Hotel';
+import { IUser } from './User';
+export interface BookingType {
   roomType: string;
   count: number;
 }
@@ -7,6 +9,18 @@ export interface IBooking {
   _id: ObjectId;
   user: ObjectId;
   hotel: ObjectId;
+  status: string;
+  price: number;
+  startDate: Date;
+  endDate: Date;
+  rooms: BookingType[];
+  createdAt: Date;
+}
+
+export interface PBooking {
+  _id: ObjectId;
+  user: IUser;
+  hotel: IHotel;
   status: string;
   price: number;
   startDate: Date;

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import User from 'models/User';
+import User from '../models/User';
 
 export async function getUsers(
   req: Request,
@@ -14,6 +14,6 @@ export async function getUsers(
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server error"});
+    res.status(500).json({ success: false, msg: 'Server error' });
   }
 }

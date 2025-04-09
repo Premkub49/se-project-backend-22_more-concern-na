@@ -37,14 +37,8 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, email, tel, password, role } = req.body;
-    const user = await User.create({
-      name,
-      email,
-      tel,
-      password,
-      role,
-    });
+    const reqUser:IUser = req.body;
+    const user = await User.create(reqUser);
     sendTokenResponse(user as unknown as IUser, 200, res);
     return;
   } catch (err: any) {
@@ -113,6 +107,12 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   res.status(statusCode).cookie('token', token, options).json({
     success: true,
     token,
+    data: {
+      name: user.name,
+      picture: user.picture,
+      role:user.role,
+      point:user.point
+    }
   });
 };
 export const getMe = async (

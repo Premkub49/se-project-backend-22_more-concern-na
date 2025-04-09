@@ -1,10 +1,9 @@
 import mongoose, { ObjectId } from 'mongoose';
-interface Rooms {
+export interface Rooms {
   roomType: string;
   picture?: string;
   capacity: number;
   maxCount: number;
-  remainCount: number;
   price: number;
 }
 
@@ -30,6 +29,7 @@ const HotelSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Please add a name'],
       trim: true,
+      unique:true
     },
     description: {
       type: String,
@@ -91,10 +91,6 @@ const HotelSchema = new mongoose.Schema(
             type: Number,
             required: [true, 'Please add a maxCount'],
           },
-          remainCount: {
-            type: Number,
-            required: [true, 'Please add a remainingCount'],
-          },
           price: {
             type: Number,
             required: [true, 'Please add a price'],
@@ -102,6 +98,13 @@ const HotelSchema = new mongoose.Schema(
         },
       ],
       required: [true, 'Please add rooms'],
+      validate: {
+        validator: function (rooms: Rooms[]){
+          const uniqueRoomTypes = new Set(rooms.map((room)=>room.roomType));
+          return uniqueRoomTypes.size === rooms.length;
+        },
+        message: 'Room types must be unique',
+      }
     },
     ratingSum: {
       type: Number,
@@ -115,6 +118,7 @@ const HotelSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    autoIndex: true
   },
 );
 
