@@ -86,7 +86,7 @@ export async function getHotel(
   next: NextFunction,
 ) {
   try {
-    const hotelId = req.params.id;
+    const hotelId = req.params.hotelId;
     const hotel = await Hotel.findById(hotelId);
     if (!hotel) {
       res.status(404).json({ success: false, msg: 'Not Found Hotel' });
@@ -128,12 +128,12 @@ export async function updateHotel(
   try {
     const reqBody:IHotel = req.body;
     if(req.user && req.user.role === "hotelManager"){
-      if(req.params.id !== req.user.hotel as unknown as string){
+      if(req.params.HotelId !== req.user.hotel as unknown as string){
         res.status(400).json({success:false, msg:"It isn't your hotel get out."})
         return;
       }
     }
-    await Hotel.updateOne({ _id: req.params.id }, reqBody);
+    await Hotel.updateOne({ _id: req.params.hotelId }, reqBody);
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
@@ -147,9 +147,9 @@ export async function deleteHotel(
   next: NextFunction,
 ) {
   try {
-    await Hotel.deleteOne({ _id: req.params.id });
+    await Hotel.deleteOne({ _id: req.params.hotelId });
     await User.updateMany(
-      { hotel: new mongoose.Types.ObjectId(req.params.id) },
+      { hotel: new mongoose.Types.ObjectId(req.params.hotelId) },
       { $unset: { hotel: "" } }
     );
     res.status(200).json({ success: true });
@@ -163,7 +163,7 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
   try{
     const reqQuery = {...req.query};
     const query = await noSQLInjection(reqQuery);
-    const hotelId:string = await noSQLInjection(req.params.id);
+    const hotelId:string = await noSQLInjection(req.params.hotelId);
     const checkIn = new Date(query.checkin)
     const checkOut = new Date(query.checkout)
     const checkinUTC = new Date(checkIn.getTime() - (checkIn.getTimezoneOffset() * 60000));
