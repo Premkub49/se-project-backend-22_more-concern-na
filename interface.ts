@@ -1,6 +1,11 @@
 // interface.ts
 
 // ---------- Shared Types ----------
+interface GenericResponse {
+    success: boolean;
+    msg ?: string
+}
+
 interface RoomAvailability {
     type: string;
     remainCount: number;
@@ -41,8 +46,7 @@ interface ReviewResponseSection {
     data: Review[];
 }
 
-interface HotelReviewsResponse {
-    success: boolean;
+interface HotelReviewsResponse extends GenericResponse {
     self: ReviewResponseSection;
     other: ReviewResponseSection;
 }
@@ -53,8 +57,7 @@ interface HotelAvailabilityQuery {
     checkout: Date;
 }
 
-interface HotelAvailabilityResponse {
-    success: boolean;
+interface HotelAvailabilityResponse extends GenericResponse {
     rooms: RoomAvailability[];
 }
 
@@ -67,8 +70,7 @@ interface CreateBookingBody {
     coupons: string; // ObjectId of redeemable
 }
 
-interface CreateBookingResponse {
-    success: boolean;
+interface CreateBookingResponse extends GenericResponse{
     redirectUrl: string; // to user’s manage booking page
 }
 
@@ -78,20 +80,17 @@ interface UpdateReviewBody {
     rating: number;
 }
 
-interface UpdateReviewResponse {
-    success: boolean;
+interface UpdateReviewResponse extends GenericResponse{
 }
 // ---------- DELETE /reviews/:id ----------
-interface DeleteReviewResponse {
-    success: boolean;
+interface DeleteReviewResponse extends GenericResponse{
 }
 // ---------- POST /reports ----------
 interface CreateReportBody {
     reviewId: string;
     reason: string;
 }
-interface CreateReportResponse {
-    success: boolean;
+interface CreateReportResponse extends GenericResponse{
 }
 
 
@@ -103,8 +102,7 @@ interface BookingSummary {
 }
 
 // ---------- GET /user ----------
-interface GetUserResponse {
-    success: boolean;
+interface GetUserResponse extends GenericResponse{
     picture?: string;
     name: string;
     email: string;
@@ -121,8 +119,7 @@ interface CreateUserBody {
     password?: string;
 }
 
-interface CreateUserResponse {
-    success: boolean;
+interface CreateUserResponse extends GenericResponse{
     picture?: string;
     name?: string;
     tel?: string;
@@ -147,8 +144,7 @@ interface LoginRequest {
 // ---------- Auth Response ----------
 type UserRole = 'guest' | 'admin' | 'user' | 'hotelManager'; // Adjust as needed
 
-interface AuthResponse {
-    success: boolean;
+interface AuthResponse extends GenericResponse{
     token: string;
     data: {
         name: string;
@@ -169,8 +165,7 @@ interface BookingsRequest {
         numberOfRoom: number;
     }[];
 }
-interface BookingsResponse {
-    success: boolean;
+interface BookingsResponse extends GenericResponse{
 }
 
 // ---------- Hotels Request ----------
@@ -198,8 +193,7 @@ interface HotelsRequest {
     rooms: HotelRoom[];
 }
 
-interface HotelsResponse{
-    success: boolean;
+interface HotelsResponse extends GenericResponse{
 }
 
 //---------GET /bookings-----------
@@ -230,13 +224,11 @@ interface BookingData {
     data: Booking[];
 }
 
-interface BookingResponse {
-    success: boolean;
+interface BookingResponse extends GenericResponse{
     active: BookingData;
     upcoming: BookingData;
     past: BookingData;
 }
 
-interface DeleteBookingResponse{
-    success: boolean;
+interface DeleteBookingResponse  extends GenericResponse{
 }
