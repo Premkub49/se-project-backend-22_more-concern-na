@@ -42,6 +42,7 @@ interface ReviewResponseSection {
 }
 
 interface HotelReviewsResponse {
+    success: boolean;
     self: ReviewResponseSection;
     other: ReviewResponseSection;
 }
@@ -53,6 +54,7 @@ interface HotelAvailabilityQuery {
 }
 
 interface HotelAvailabilityResponse {
+    success: boolean;
     rooms: RoomAvailability[];
 }
 
@@ -66,6 +68,7 @@ interface CreateBookingBody {
 }
 
 interface CreateBookingResponse {
+    success: boolean;
     redirectUrl: string; // to user’s manage booking page
 }
 
@@ -75,12 +78,20 @@ interface UpdateReviewBody {
     rating: number;
 }
 
-
-
+interface UpdateReviewResponse {
+    success: boolean;
+}
+// ---------- DELETE /reviews/:id ----------
+interface DeleteReviewResponse {
+    success: boolean;
+}
 // ---------- POST /reports ----------
 interface CreateReportBody {
     reviewId: string;
     reason: string;
+}
+interface CreateReportResponse {
+    success: boolean;
 }
 
 
@@ -93,6 +104,7 @@ interface BookingSummary {
 
 // ---------- GET /user ----------
 interface GetUserResponse {
+    success: boolean;
     picture?: string;
     name: string;
     email: string;
@@ -110,6 +122,7 @@ interface CreateUserBody {
 }
 
 interface CreateUserResponse {
+    success: boolean;
     picture?: string;
     name?: string;
     tel?: string;
@@ -156,8 +169,9 @@ interface BookingsRequest {
         numberOfRoom: number;
     }[];
 }
-
-// interface.ts (extended with HotelsRequest)
+interface BookingsResponse {
+    success: boolean;
+}
 
 // ---------- Hotels Request ----------
 interface HotelAddress {
@@ -184,6 +198,11 @@ interface HotelsRequest {
     rooms: HotelRoom[];
 }
 
+interface HotelsResponse{
+    success: boolean;
+}
+
+//---------GET /bookings-----------
 interface BookingQuery {
     activePage?: number;
     activePageSize?: number;
@@ -212,7 +231,12 @@ interface BookingData {
 }
 
 interface BookingResponse {
+    success: boolean;
     active: BookingData;
     upcoming: BookingData;
     past: BookingData;
+}
+
+interface DeleteBookingResponse{
+    success: boolean;
 }
