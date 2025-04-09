@@ -3,6 +3,7 @@ export interface IReport {
   _id: ObjectId;
   review: ObjectId;
   reportDate: Date;
+  isIgnore: boolean;
   reportReason: string;
 }
 
