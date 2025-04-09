@@ -4,7 +4,6 @@ export interface Rooms {
   picture?: string;
   capacity: number;
   maxCount: number;
-  remainCount: number;
   price: number;
 }
 
@@ -98,6 +97,13 @@ const HotelSchema = new mongoose.Schema(
         },
       ],
       required: [true, 'Please add rooms'],
+      validate: {
+        validator: function (rooms: Rooms[]){
+          const uniqueRoomTypes = new Set(rooms.map((room)=>room.roomType));
+          uniqueRoomTypes.size === rooms.length;
+        },
+        message: 'Room types must be unique',
+      }
     },
     ratingSum: {
       type: Number,
@@ -111,6 +117,7 @@ const HotelSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    autoIndex: true
   },
 );
 
