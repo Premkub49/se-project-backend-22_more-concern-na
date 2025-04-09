@@ -6,7 +6,10 @@ const connectDB = async () => {
     console.log('mongo env uri not found');
     return;
   }
-  const conn = await mongoose.connect(process.env.MONGO_URI as string);
+  const optionsConnect =  {
+    autoIndex: true
+  };
+  const conn = await mongoose.connect(process.env.MONGO_URI as string,optionsConnect);
   console.log(`MongoDB Connected: ${conn.connection.host}`);
 };
 
