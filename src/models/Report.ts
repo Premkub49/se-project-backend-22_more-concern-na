@@ -4,6 +4,7 @@ export interface IReport {
   review: ObjectId;
   reportDate: Date;
   reportReason: string;
+  ignore?:boolean;
 }
 
 const ReportSchema = new mongoose.Schema({
@@ -30,6 +31,10 @@ const ReportSchema = new mongoose.Schema({
     ],
     required: [true, 'Please add a report reason'],
   },
+  ignore:{
+    type:Boolean,
+    default:false
+  }
 });
 
 export default mongoose.model('Report', ReportSchema);
