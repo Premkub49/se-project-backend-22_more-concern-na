@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import Hotel, { IHotel } from '../models/Hotel';
 import Booking from '../models/Booking';
 import mongoose from 'mongoose';
-import missingRequiredFields from './libs/resMsg';
+import User from '../models/User';
 
 function noSQLInjection(data:object | string) {
   let dataStr = JSON.stringify(data);
@@ -148,6 +148,10 @@ export async function deleteHotel(
 ) {
   try {
     await Hotel.deleteOne({ _id: req.params.id });
+    await User.updateMany(
+      { hotel: new mongoose.Types.ObjectId(req.params.id) },
+      { $unset: { hotel: "" } }
+    );
     res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);

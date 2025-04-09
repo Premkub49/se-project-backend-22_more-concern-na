@@ -139,9 +139,21 @@ export async function addBooking(
   next: NextFunction,
 ) {
   try {
-    if (!req.body.user) {
-      req.body.user = req.user?._id;
+    if(!req.user) {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
     }
+
+    if(req.user.role === 'user') {
+      req.body.user = req.user._id;
+    }
+
+    if(req.params.hotelId) {
+      req.body.hotel = req.params.hotelId;
+    }
+
     const booking: IBooking = req.body;
     let price = 0;
     if (!(booking.endDate instanceof Date)) {
