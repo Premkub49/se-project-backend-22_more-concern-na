@@ -16,6 +16,10 @@ const ReportSchema = new mongoose.Schema({
     type: Date,
     default: () => Date.now(),
   },
+  isIgnore: {
+    type: Boolean,
+    default: false
+  },
   reportReason: {
     type: String,
     enum: [
@@ -31,5 +35,6 @@ const ReportSchema = new mongoose.Schema({
     required: [true, 'Please add a report reason'],
   },
 });
+
 
 export default mongoose.model('Report', ReportSchema);
