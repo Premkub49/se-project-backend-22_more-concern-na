@@ -1,5 +1,6 @@
 import mongoose, { ObjectId } from 'mongoose';
 export interface Rooms {
+  _id: ObjectId;
   roomType: string;
   picture?: string;
   capacity: number;
@@ -72,6 +73,11 @@ const HotelSchema = new mongoose.Schema(
     rooms: {
       type: [
         {
+          _id: {
+            type: mongoose.Schema.Types.ObjectId,
+            unique: true,
+            default: new mongoose.Types.ObjectId()
+          },
           roomType: {
             type: String,
             required: [true, 'Please add a room type'],
