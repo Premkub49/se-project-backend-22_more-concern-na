@@ -3,7 +3,6 @@ export interface IReport {
   _id: ObjectId;
   review: ObjectId;
   reportDate: Date;
-  isIgnore: boolean;
   reportReason: string;
 }
 
@@ -16,10 +15,6 @@ const ReportSchema = new mongoose.Schema({
   reportDate: {
     type: Date,
     default: () => Date.now(),
-  },
-  isIgnore: {
-    type: Boolean,
-    default: false
   },
   reportReason: {
     type: String,
