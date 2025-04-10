@@ -4,7 +4,7 @@ export interface IReport {
   review: ObjectId;
   reportDate: Date;
   reportReason: string;
-  isIgnore:boolean;
+  isIgnore: boolean;
 }
 
 const ReportSchema = new mongoose.Schema({
@@ -31,9 +31,9 @@ const ReportSchema = new mongoose.Schema({
     ],
     required: [true, 'Please add a report reason'],
   },
-  isIgnore:{
-    type:Boolean,
-    default:false
+  isIgnore: {
+    type: Boolean,
+    default: false
   }
 });
 
