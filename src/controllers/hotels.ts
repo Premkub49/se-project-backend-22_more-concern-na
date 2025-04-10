@@ -128,7 +128,7 @@ export async function updateHotel(
   try {
     const reqBody:IHotel = req.body;
     if(req.user && req.user.role === "hotelManager"){
-      if(req.params.HotelId !== req.user.hotel as unknown as string){
+      if(req.params.hotelId !== req.user.hotel as unknown as string){
         res.status(400).json({success:false, msg:"It isn't your hotel get out."})
         return;
       }

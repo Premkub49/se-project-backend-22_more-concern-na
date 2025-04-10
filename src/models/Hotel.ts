@@ -76,7 +76,7 @@ const HotelSchema = new mongoose.Schema(
           _id: {
             type: mongoose.Schema.Types.ObjectId,
             unique: true,
-            default: new mongoose.Types.ObjectId()
+            default: () => new mongoose.Types.ObjectId()
           },
           roomType: {
             type: String,
