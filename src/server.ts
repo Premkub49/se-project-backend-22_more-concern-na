@@ -5,6 +5,7 @@ import auth from './routes/auth';
 import bookings from './routes/bookings';
 import hotels from './routes/hotels';
 import connectDB from './config/db';
+import reports from './routes/reports'
 
 configDotenv({ path: '.env' });
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/hotels', hotels);
 app.use('/auth', auth);
 app.use('/bookings', bookings);
+app.use('/reports', reports);
 
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 5050;
