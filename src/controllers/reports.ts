@@ -36,7 +36,7 @@ export async function getReports(
         const sortBy = req.query.sort.split(",").join(" ");
         query = query.sort(sortBy);
       } else {
-        query = query.sort("-createdAt");
+        query = query.sort("-reportDate");
       }
     const reports = await query;
     res.status(200).json({
@@ -49,24 +49,38 @@ export async function getReports(
   }
 }
 
-export async function updateReport(
+export async function updateReport( 
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-      const reqBody:IReport = req.body;
-      if(req.user && req.user.role !== "admin"){
-          res.status(400).json({success:false, msg:"you are not an admin"})
-          return;
-      }
-      await Report.updateOne({ _id: req.params.id },reqBody);
-      res.status(200).json({ success: true });
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({success:false, msg:"Server Error"});
+    if (req.user && req.user.role !== "admin") {
+      res.status(400).json({ success: false, msg: "you are not an admin" });
+      return;
     }
+
+    // Enforce updating only `isIgnore`
+    if (!Object.prototype.hasOwnProperty.call(req.body, "isIgnore") || Object.keys(req.body).length !== 1) {
+      res.status(400).json({ success: false, msg: "Only 'isIgnore' field can be updated" });
+      return;
+    }
+
+    const isIgnore = req.body.isIgnore;
+
+    await Report.updateOne(
+      { _id: req.params.id },
+      { $set: { isIgnore } }
+    );
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, msg: "Server Error" });
+  }
 }
+
+
 
 export async function addReport(
   req: Request,
