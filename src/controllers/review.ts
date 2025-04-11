@@ -44,3 +44,36 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
       res.status(500).json({ success: false, msg: "Server Error" });
    }
 }
+
+export async function updateReview(req: Request, res: Response, next: NextFunction) {
+   try {
+      if(!req.user) {
+         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         return;
+      }
+
+      const reviewId = req.params.id;
+      const review: IReview | null = await Review.findById(reviewId);
+
+      if (!review) {
+         res.status(404).json({ success: false, msg: "Review not found" });
+         return;
+      }
+
+      if(!review.booking) {
+         res.status(400).json({ success: false, msg: "Review does not have a booking" });
+         return;
+      }
+
+      if(req.user.role !== "admin" && review.booking.toString() !== req.user._id.toString()) {
+         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         return;
+      }
+
+      await Review.updateOne({ _id: reviewId }, { $set: req.body });
+      res.status(200).json({ success: true });
+   } catch (error: any) {
+      console.error(error.stack);
+      res.status(500).json({ success: false, msg: "Server Error" });
+   }
+}
