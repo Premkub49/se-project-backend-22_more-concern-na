@@ -159,13 +159,14 @@ interface BookingsRequest {
     endDate: Date;
     rooms: {
         roomType: string;
-        numberOfRoom: number;
+        count: number;
     }[];
 }
 
 
 // ---------- Hotels Request ----------
 interface HotelRoom {
+    _id?: string;
     roomType: string;
     picture?: string;
     capacity: number;
@@ -173,10 +174,11 @@ interface HotelRoom {
     price: number;
 }
 
-interface HotelsRequest {
+interface IHotel {
+    _id?: string;
     name: string;
-    description: string;
-    picture: string; // base64 string
+    description?: string;
+    picture?: string;
     buildingNumber: string;
     street: string;
     district: string;
@@ -187,8 +189,21 @@ interface HotelsRequest {
     ratingSum: number;
     ratingCount: number;
 }
-
-
+//---------GET /hotels-----------
+interface HotelResponse extends GenericResponse{
+    count: number;
+    pagination: {
+        next?: {
+            page: number;
+            limit: number;
+        },
+        prev?: {
+            page: number;
+            limit: number;
+        }
+    },
+    data: IHotel[]
+}
 
 //---------GET /bookings-----------
 interface BookingQuery {
