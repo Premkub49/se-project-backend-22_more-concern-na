@@ -6,14 +6,14 @@ import bookings from './routes/bookings';
 import hotels from './routes/hotels';
 import connectDB from './config/db';
 import reports from './routes/reports'
-
+import cors from 'cors';
 configDotenv({ path: '.env' });
 
 const app: Express = express();
 connectDB();
+app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
-
 app.use('/hotels', hotels);
 app.use('/auth', auth);
 app.use('/bookings', bookings);
