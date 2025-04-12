@@ -1,20 +1,145 @@
-// interface.ts
-
 // ---------- Shared Types ----------
+type UserRole = 'admin' | 'user' | 'hotelManager';
 interface GenericResponse {
     success: boolean;
     msg ?: string
 }
 
+interface Pagination {
+    pagination: {
+        next?: {
+            page: number;
+            limit: number;
+        },
+        prev?: {
+            page: number;
+            limit: number;
+        }
+    }
+}
+
+//-----HotelSchema Interface-----
 interface RoomAvailability {
     type: string;
     remainCount: number;
 }
+interface Rooms {
+    _id?: string;
+    roomType: string;
+    picture?: string;
+    capacity: number;
+    maxCount: number;
+    price: number;
+}
+interface IHotel {
+    _id?: string;
+    name: string;
+    description?: string;
+    picture?: string;
+    buildingNumber: string;
+    street: string;
+    district: string;
+    province: string;
+    postalCode: string;
+    tel: string;
+    rooms: Rooms[];
+    ratingSum: number;
+    ratingCount: number;
+}
 
-interface SelectedRoom {
-    type: string;
+interface HotelResponse extends GenericResponse, Pagination {
+    count: number;
+    data: IHotel[]
+}
+interface HotelAvailabilityResponse extends GenericResponse {
+    rooms: RoomAvailability[];
+}
+
+//------UserSchema Interface-----
+interface UserRedeemable {
+    redeemableId: string;
     count: number;
 }
+interface IUser {
+    _id: string;
+    id?: string;
+    name: string;
+    tel: string;
+    picture?: string;
+    email: string;
+    password: string;
+    role: string;
+    hotel: string;
+    point: number;
+    inventory: UserRedeemable[];
+    createdAt: string;
+}
+
+interface LoginRequest {
+    email: string;
+    password: string;
+}
+interface GetMeResponse extends GenericResponse {
+    data: IUser;
+}
+interface AuthResponse extends GenericResponse{
+    token: string;
+    data: {
+        name: string;
+        picture: string;
+        role: UserRole;
+        point: number;
+    }
+}
+
+//-------ReviewSchema Interface------
+interface IReview {
+    _id: string;
+    booking?: string;
+    rating?: number;
+    reply?: string;
+    title?: string;
+    text?: string;
+    createdAt: string;
+  }
+
+//-------ReportSchema Interface------
+interface IReport {
+    _id: string;
+    review: string;
+    reportDate: string;
+    reportReason: string;
+    isIgnore: boolean;
+  }
+
+//-------RedeemableSchema Interface------
+interface IRedeemable {
+    _id: string;
+    type: string;
+    name: string;
+    description?: string;
+    picture?: string;
+    pointUse: number;
+    discount?: number;
+    remainCount: number;
+}
+
+//------BookingSchema Interface-----
+interface BookingType {
+    roomType: string;
+    count: number;
+}
+interface IBooking {
+    _id: string;
+    user: string;
+    hotel: string;
+    status: string;
+    price: number;
+    startDate: string;
+    endDate: string;
+    rooms: BookingType[];
+    createdAt: string;
+  }
 
 // ---------- GET /hotels/:id/reviews ----------
 interface HotelReviewsQuery {
@@ -25,15 +150,15 @@ interface HotelReviewsQuery {
 }
 
 interface ReviewPagination {
+    count
     prev?: number;
     next?: number;
-    count: number;
 }
 
 interface Review {
     userName: string;
     picture: string;
-    stayMonth: Date;
+    stayMonth: string;
     stayRoom: string;
     title: string;
     rating: number;
@@ -51,26 +176,6 @@ interface HotelReviewsResponse extends GenericResponse {
     other: ReviewResponseSection;
 }
 
-// ---------- GET /hotels/:id/available ----------
-interface HotelAvailabilityResponse extends GenericResponse {
-    rooms: RoomAvailability[];
-}
-
-// ---------- POST /bookings ----------
-interface BookingRequest {
-    hotel?: string;
-    user?: string;
-    price: number;
-    startDate: Date;
-    endDate: Date;
-    rooms: SelectedRoom[];
-}
-
-//TODO-Notyet
-interface CreateBookingResponse extends GenericResponse{
-    redirectUrl: string; // to user’s manage booking page
-}
-
 // ---------- PUT /reviews/:id ----------
 interface UpdateReviewBody {
     title?: string;
@@ -79,31 +184,10 @@ interface UpdateReviewBody {
 }
 
 
-
 // ---------- POST /reports ----------
 interface CreateReportBody {
     review: string;
     reportReason: string;
-}
-
-
-// ---------- Shared ----------
-// TODO-NOTYET
-interface BookingSummary {
-    active: number;
-    upcoming: number;
-    past: number;
-}
-
-// ---------- GET /user ----------
-//TODO-NOTYET
-interface GetUserResponse extends GenericResponse{
-    picture?: string;
-    name: string;
-    email: string;
-    tel: string;
-    point: number;
-    bookings: BookingSummary;
 }
 
 // ---------- POST /user ----------
@@ -122,32 +206,6 @@ interface CreateUserResponse extends GenericResponse{
 }
 
 
-// ---------- Register ----------
-interface RegisterRequest {
-    email: string;
-    password: string;
-    name: string;
-    tel: string;
-}
-
-// ---------- Login ----------
-interface LoginRequest {
-    email: string;
-    password: string;
-}
-
-// ---------- Auth Response ----------
-type UserRole = 'guest' | 'admin' | 'user' | 'hotelManager'; // Adjust as needed
-
-interface AuthResponse extends GenericResponse{
-    token: string;
-    data: {
-        name: string;
-        picture: string;
-        role: UserRole;
-        point: number;
-    }
-}
 
 // ---------- Bookings Request ----------
 interface BookingsRequest {
@@ -155,8 +213,8 @@ interface BookingsRequest {
     user: string;
     status?: string;
     price: number;
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
     rooms: {
         roomType: string;
         count: number;
@@ -164,78 +222,20 @@ interface BookingsRequest {
 }
 
 
-// ---------- Hotels Request ----------
-interface HotelRoom {
-    _id?: string;
-    roomType: string;
-    picture?: string;
-    capacity: number;
-    maxCount: number;
-    price: number;
-}
-
-interface IHotel {
-    _id?: string;
-    name: string;
-    description?: string;
-    picture?: string;
-    buildingNumber: string;
-    street: string;
-    district: string;
-    province: string;
-    postalCode: string;
-    tel: string;
-    rooms: HotelRoom[];
-    ratingSum: number;
-    ratingCount: number;
-}
-//---------GET /hotels-----------
-interface HotelResponse extends GenericResponse{
-    count: number;
-    pagination: {
-        next?: {
-            page: number;
-            limit: number;
-        },
-        prev?: {
-            page: number;
-            limit: number;
-        }
-    },
-    data: IHotel[]
-}
-
 //---------GET /bookings-----------
-interface BookingQuery {
-    activePage?: number;
-    activePageSize?: number;
-    upcomingPage?: number;
-    upcomingPageSize?: number;
-    pastPage?: number;
-    pastPageSize?: number;
+interface PBooking {
+    _id: string;
+    user: IUser;
+    hotel: IHotel;
+    status: string;
+    price: number;
+    startDate: string;
+    endDate: string;
+    rooms: BookingType[];
+    createdAt: string;
 }
-
-interface BookingPagination {
-    prev?: number;
-    next?: number;
-    count: number; // count data that query after offset
-}
-
-interface Booking {
-    hotelName: string;
-    startDate: Date;
-    endDate: Date;
-    address: string;
-}
-
-interface BookingData {
-    pagination: BookingPagination;
-    data: Booking[];
-}
-
 interface BookingResponse extends GenericResponse{
-    active: BookingData;
-    upcoming: BookingData;
-    past: BookingData;
+    count: number;
+    bookings?:PBooking[];
+    booking?:PBooking;
 }
-
