@@ -3,7 +3,7 @@ import { authorize, protect } from '../middleware/auth';
 import { addReview, updateReview } from 'controllers/review';
 import routerRespond from './respond';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.use('/:reviewId/respond', protect, authorize('admin', 'hotelManager'), routerRespond);
 
