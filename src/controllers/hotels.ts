@@ -168,8 +168,8 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
     const checkOut = new Date(query.checkout)
     // const checkinUTC = new Date(checkIn.getTime() + (checkIn.getTimezoneOffset() * 60000));
     // const checkoutUTC = new Date(checkOut.getTime() + (checkOut.getTimezoneOffset() * 60000));
-    // console.log(checkinUTC);
-    // console.log(checkoutUTC);
+    console.log(checkIn);
+    console.log(checkOut);
     const roomsUsed =  await Booking.aggregate([
       {
         $match: {
