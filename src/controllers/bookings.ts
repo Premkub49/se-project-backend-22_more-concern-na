@@ -144,9 +144,9 @@ export async function getBookings(
     };
 
     if (req.user.role === 'admin') {
-      query = (await Booking.find()
+      query = Booking.find()
         .populate(populateUser)
-        .populate(populateHotel));
+        .populate(populateHotel);
     } else if (req.user.role === 'hotelManager') {
       if (!req.user.hotel) {
         res
@@ -154,13 +154,13 @@ export async function getBookings(
           .json({ success: false, msg: 'Not authorized to access this route' });
         return;
       }
-      query = (await Booking.find({ hotel: req.user.hotel })
+      query = Booking.find({ hotel: req.user.hotel })
         .populate(populateUser)
-        .populate(populateHotel));
+        .populate(populateHotel);
     } else {
-      query = (await Booking.find({ user: req.user._id })
+      query = Booking.find({ user: req.user._id })
         .populate(populateUser)
-        .populate(populateHotel));
+        .populate(populateHotel);
     }
 
     if (!query) {
@@ -172,8 +172,8 @@ export async function getBookings(
     const page = parseInt(req.query.page as string) || 1;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-    const total = query.length;
-    const totalPage = Math.ceil(query.length / limit);
+    const total = await query.clone().countDocuments();
+    const totalPage = Math.ceil(total / limit);
     query = query.skip(startIndex).limit(limit);
     const bookings: PBooking[] = await query.exec();
     const pagination: { next?:{ page: number, limit: number }, prev?:{ page: number, limit: number }, total?: number } = { total: totalPage };
