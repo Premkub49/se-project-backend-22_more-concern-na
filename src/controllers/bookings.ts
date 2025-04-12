@@ -324,7 +324,6 @@ export async function updateBooking(
     const bookingId = req.params.id;
 
     const booking: IBooking | null = await Booking.findById(bookingId);
-    console.log(bookingId);
     if (!booking) {
       res.status(404).json({ success: false, msg: 'Not Found Booking' });
       return;

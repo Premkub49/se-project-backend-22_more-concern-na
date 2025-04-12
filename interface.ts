@@ -72,7 +72,7 @@ interface IUser {
     hotel: string;
     point: number;
     inventory: UserRedeemable[];
-    createdAt: Date;
+    createdAt: string;
 }
 
 interface LoginRequest {
@@ -100,14 +100,14 @@ interface IReview {
     reply?: string;
     title?: string;
     text?: string;
-    createdAt: Date;
+    createdAt: string;
   }
 
 //-------ReportSchema Interface------
 interface IReport {
     _id: string;
     review: string;
-    reportDate: Date;
+    reportDate: string;
     reportReason: string;
     isIgnore: boolean;
   }
@@ -135,10 +135,10 @@ interface IBooking {
     hotel: string;
     status: string;
     price: number;
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
     rooms: BookingType[];
-    createdAt: Date;
+    createdAt: string;
   }
 
 // ---------- GET /hotels/:id/reviews ----------
@@ -158,7 +158,7 @@ interface ReviewPagination {
 interface Review {
     userName: string;
     picture: string;
-    stayMonth: Date;
+    stayMonth: string;
     stayRoom: string;
     title: string;
     rating: number;
@@ -213,8 +213,8 @@ interface BookingsRequest {
     user: string;
     status?: string;
     price: number;
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
     rooms: {
         roomType: string;
         count: number;
@@ -229,10 +229,10 @@ interface PBooking {
     hotel: IHotel;
     status: string;
     price: number;
-    startDate: Date;
-    endDate: Date;
+    startDate: string;
+    endDate: string;
     rooms: BookingType[];
-    createdAt: Date;
+    createdAt: string;
 }
 interface BookingResponse extends GenericResponse{
     count: number;

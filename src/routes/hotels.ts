@@ -13,5 +13,5 @@ router.route('/:hotelId')
 .get(getHotel)
 .put(protect,authorize("admin","hotelManager"),updateHotel)
 .delete(protect,authorize("admin"),deleteHotel);
-router.route('/:hotelId/available').get(protect,checkAvailable);
+router.route('/:hotelId/available').get(checkAvailable);
 export default router;
