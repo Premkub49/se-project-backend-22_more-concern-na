@@ -166,15 +166,17 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
     const hotelId:string = await noSQLInjection(req.params.hotelId);
     const checkIn = new Date(query.checkin)
     const checkOut = new Date(query.checkout)
-    const checkinUTC = new Date(checkIn.getTime() + (checkIn.getTimezoneOffset() * 60000));
-    const checkoutUTC = new Date(checkOut.getTime() + (checkOut.getTimezoneOffset() * 60000));
+    // const checkinUTC = new Date(checkIn.getTime() + (checkIn.getTimezoneOffset() * 60000));
+    // const checkoutUTC = new Date(checkOut.getTime() + (checkOut.getTimezoneOffset() * 60000));
+    // console.log(checkinUTC);
+    // console.log(checkoutUTC);
     const roomsUsed =  await Booking.aggregate([
       {
         $match: {
           hotel: new mongoose.Types.ObjectId(hotelId),
           status:{$in:["reserved", "checkedIn"]},
-          startDate: {$gte:checkinUTC,$lte:checkoutUTC},
-          endDate:  {$gte:checkinUTC,$lte:checkoutUTC}
+          startDate: {$gte:checkIn,$lte:checkOut},
+          endDate:  {$gte:checkIn,$lte:checkOut}
         }
       },
       {
