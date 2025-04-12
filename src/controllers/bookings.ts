@@ -133,7 +133,7 @@ export async function getBookings(
       return;
     }
 
-    let bookings: PBooking[] | null;
+    let query: any;
     const populateUser = {
       path: 'user',
       select: '_id name email tel point',
@@ -144,9 +144,9 @@ export async function getBookings(
     };
 
     if (req.user.role === 'admin') {
-      bookings = (await Booking.find()
+      query = (await Booking.find()
         .populate(populateUser)
-        .populate(populateHotel)) as any as PBooking[] | null;
+        .populate(populateHotel));
     } else if (req.user.role === 'hotelManager') {
       if (!req.user.hotel) {
         res
@@ -154,18 +154,56 @@ export async function getBookings(
           .json({ success: false, msg: 'Not authorized to access this route' });
         return;
       }
-      bookings = (await Booking.find({ hotel: req.user.hotel })
+      query = (await Booking.find({ hotel: req.user.hotel })
         .populate(populateUser)
-        .populate(populateHotel)) as any as PBooking[] | null;
+        .populate(populateHotel));
     } else {
-      bookings = (await Booking.find({ user: req.user._id })
+      query = (await Booking.find({ user: req.user._id })
         .populate(populateUser)
-        .populate(populateHotel)) as any as PBooking[] | null;
+        .populate(populateHotel));
+    }
+
+    if (!query) {
+      res.status(404).json({ success: false, msg: 'Not Found Booking' });
+      return;
+    }
+
+    const limit = parseInt(req.query.limit as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const total = query.length;
+    const totalPage = Math.ceil(query.length / limit);
+    query = query.skip(startIndex).limit(limit);
+    const bookings: PBooking[] = await query;
+    const pagination: { next?:{ page: number, limit: number }, prev?:{ page: number, limit: number }, total?: number } = { total: totalPage };
+
+    if(endIndex < total) {
+      if(page == totalPage - 1) {
+        pagination.next = {
+          page: page + 1,
+          limit: total % limit,
+        };
+      }
+      else {
+        pagination.next = {
+          page: page + 1,
+          limit: limit,
+        };
+      }
+    }
+    if(startIndex > 0) {
+      pagination.prev = {
+        page: page - 1,
+        limit: limit,
+      }
     }
 
     res.status(200).json({
       success: true,
-      bookings: bookings,
+      count: bookings.length,
+      pagination,
+      bookings: bookings
     });
   } catch (err) {
     console.log(err);
