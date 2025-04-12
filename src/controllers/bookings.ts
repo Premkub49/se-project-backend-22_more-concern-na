@@ -175,7 +175,7 @@ export async function getBookings(
     const total = query.length;
     const totalPage = Math.ceil(query.length / limit);
     query = query.skip(startIndex).limit(limit);
-    const bookings: PBooking[] = await query;
+    const bookings: PBooking[] = await query.exec();
     const pagination: { next?:{ page: number, limit: number }, prev?:{ page: number, limit: number }, total?: number } = { total: totalPage };
 
     if(endIndex < total) {
