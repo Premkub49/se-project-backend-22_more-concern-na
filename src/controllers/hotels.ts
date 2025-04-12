@@ -166,8 +166,8 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
     const hotelId:string = await noSQLInjection(req.params.hotelId);
     const checkIn = new Date(query.checkin)
     const checkOut = new Date(query.checkout)
-    const checkinUTC = new Date(checkIn.getTime() - (checkIn.getTimezoneOffset() * 60000));
-  const checkoutUTC = new Date(checkOut.getTime() - (checkOut.getTimezoneOffset() * 60000));
+    const checkinUTC = new Date(checkIn.getTime() + (checkIn.getTimezoneOffset() * 60000));
+    const checkoutUTC = new Date(checkOut.getTime() + (checkOut.getTimezoneOffset() * 60000));
     const roomsUsed =  await Booking.aggregate([
       {
         $match: {
