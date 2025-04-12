@@ -77,3 +77,14 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
       res.status(500).json({ success: false, msg: "Server Error" });
    }
 }
+
+export const getHotelReviews = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      const bookings = await Booking.find({ hotel: req.params.id }).select("_id");
+      const bookingIds = bookings.map((booking) => booking._id);
+      const reviews = await Review.find({ booking: { $in: bookingIds } });
+      res.status(200).json({ success: true, data: reviews });
+   } catch (error) {
+      next(error);
+   }
+};

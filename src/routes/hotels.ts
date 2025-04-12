@@ -3,6 +3,7 @@ import { addHotel, checkAvailable, deleteHotel, getHotel, getHotels, updateHotel
 import { authorize, protect } from '../middleware/auth';
 import bookingRouter from './bookings';
 import roomRouter from './rooms';
+import { getHotelReviews } from 'controllers/review';
 
 const router = express.Router();
 
@@ -14,4 +15,5 @@ router.route('/:hotelId')
 .put(protect,authorize("admin","hotelManager"),updateHotel)
 .delete(protect,authorize("admin"),deleteHotel);
 router.route('/:hotelId/available').get(protect,checkAvailable);
+router.get('/:id/reviews', getHotelReviews);
 export default router;
