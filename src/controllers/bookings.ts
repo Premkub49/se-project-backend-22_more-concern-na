@@ -4,8 +4,8 @@ import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
 import Hotel, { IHotel, Rooms } from '../models/Hotel';
 
 interface pagination {
-  next?: { page: number; };
-  prev?: { page: number; };
+  next?: { page: number; limit: number; };
+  prev?: { page: number; limit: number; };
   count?: number;
 }
 
@@ -231,10 +231,15 @@ export async function getBookings(
         data.pagination = {};
       }
       if(endIndex < total) {
-        data.pagination.next = { page: page + 1 };
+        if(page == Math.ceil(total / pageSize) - 1) {
+          data.pagination.next = { page: page + 1 , limit: total % pageSize };
+        }
+        else {
+          data.pagination.next = { page: page + 1, limit: pageSize };
+        }
       }
       if(startIndex > 0) {
-        data.pagination.prev = { page: page - 1 }
+        data.pagination.prev = { page: page - 1, limit: pageSize };
       }
 
       data.data = await query
