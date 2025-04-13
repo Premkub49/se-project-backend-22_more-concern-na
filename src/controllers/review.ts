@@ -35,7 +35,7 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
       }
 
       const review: IReview = req.body;
-      review.booking = new mongoose.Schema.Types.ObjectId(bookingId);
+      review.booking = new mongoose.Types.ObjectId(bookingId) as any;
 
       await Review.create(review);
       res.status(201).json({ success: true });
