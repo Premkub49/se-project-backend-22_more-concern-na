@@ -40,7 +40,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
       }
 
       const respond = {
-         reply: new mongoose.Types.ObjectId(req.params.ReviewId),
+         reply: new mongoose.Types.ObjectId(req.params.reviewId),
          title: req.body.title as string,
          text: req.body.text as string,
       }
@@ -70,6 +70,7 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
          path: 'booking',
          select: 'hotel'
       }
+      console.log(respond.reply);
       const review: any = await Review.findById(respond.reply).populate(populateBooking);
       if(!review) {
          res.status(404).json({ success: false, msg: "Review not found" });
@@ -85,8 +86,17 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
          return;
       }
 
-      respond.title = req.body.title;
-      respond.text = req.body.text;
+      if(!req.body.title && !req.body.text) {
+         res.status(400).json({ success: false, msg: "Please provide title or text" });
+         return;
+      }
+
+      if(req.body.title) {
+         respond.title = req.body.title;
+      }
+      if(req.body.text) {
+         respond.text = req.body.text;
+      }
 
       await respond.save();
       res.status(200).json({ success: true });

@@ -7,6 +7,7 @@ import hotels from './routes/hotels';
 import connectDB from './config/db';
 import reports from './routes/reports'
 import reviews from './routes/reviews';
+import respond from './routes/respond';
 
 configDotenv({ path: '.env' });
 
@@ -20,6 +21,7 @@ app.use('/auth', auth);
 app.use('/bookings', bookings);
 app.use('/reports', reports);
 app.use('/reviews', reviews);
+app.use('/respond', respond);
 
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 5050;
