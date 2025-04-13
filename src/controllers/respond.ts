@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import Review from "models/Review";
+import Review from "../models/Review";
 import mongoose from "mongoose";
 
 export async function addRespond( req: Request, res: Response, next: NextFunction) {
@@ -35,7 +35,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          return;
       }
       if(req.user.role !== 'admin' && review.booking.hotel.toString() !== req.user.hotel.toString()) {
-         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
 
@@ -60,7 +60,7 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
          return;
       }
 
-      const respond: any = await Review.findById(req.params.id);
+      const respond: any = await Review.findById(req.params.respondId);
       if(!respond) {
          res.status(404).json({ success: false, msg: "Respond not found" });
          return;
@@ -82,7 +82,7 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
       }
 
       if(req.user.role !== 'admin' && review.booking.hotel.toString() !== req.user.hotel.toString()) {
-         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
 

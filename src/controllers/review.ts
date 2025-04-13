@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import Booking, { IBooking } from "models/Booking";
-import Review, { IReview } from "models/Review";
+import Booking, { IBooking } from "../models/Booking";
+import Review, { IReview } from "../models/Review";
 import mongoose from "mongoose";
 
 export async function addReview(req: Request, res: Response, next: NextFunction) {
@@ -19,7 +19,7 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
       }
 
       if(req.user.role !== "admin" && booking.user.toString() !== req.user._id.toString()) {
-         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
 
@@ -31,6 +31,16 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
       const reviewExists = await Review.findOne({ booking: bookingId });
       if (reviewExists) {
          res.status(400).json({ success: false, msg: "Review already exists" });
+         return;
+      }
+
+      if (req.body.reply) {
+         res.status(400).json({ success: false, msg: "Cannot create a review with a reply field" });
+         return;
+      }
+      
+      if (!req.body.rating || !req.body.title || !req.body.text) {
+         res.status(400).json({ success: false, msg: "Rating, title, and text are required" });
          return;
       }
 
@@ -52,7 +62,7 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
          return;
       }
 
-      const reviewId = req.params.id;
+      const reviewId = req.params.reviewId;
       const review: IReview | null = await Review.findById(reviewId);
 
       if (!review) {
@@ -73,11 +83,17 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
 
       if(req.user.role !== "admin" && booking.user.toString() !== req.user._id.toString()) {
          console.log("User ID:", req.user._id.toString());
-         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
 
-      await Review.updateOne({ _id: reviewId }, { $set: req.body });
+      const { rating, title, text } = req.body;
+      if (!rating || !title || !text) {
+         res.status(400).json({ success: false, msg: "Rating, title, and text are required" });
+         return;
+      }
+
+      await Review.updateOne({ _id: reviewId }, { $set: { rating, title, text } });
       res.status(200).json({ success: true });
    } catch (error: any) {
       console.error(error.stack);
@@ -87,7 +103,7 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
 
 export const getHotelReviews = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const bookings = await Booking.find({ hotel: req.params.id }).select("_id user").populate("user");
+      const bookings = await Booking.find({ hotel: req.params.hotelId }).select("_id user").populate("user");
       const bookingIds = bookings.map((booking) => booking._id);
       const yourBooking = bookings.map((booking) => booking.user);
 
@@ -116,11 +132,11 @@ export const getHotelReviews = async (req: Request, res: Response, next: NextFun
          .limit(otherPageSize);
 
       // executing pagination for self reviews
-      const selfPagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
+      const selfPagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number }; count:number } = { count: selfTotal};
       if (selfEndIndex < selfTotal) selfPagination.next = { page: selfPage + 1, limit: selfPageSize };
       if (selfStartIndex > 0) selfPagination.prev = { page: selfPage - 1, limit: selfPageSize};
       // executing pagination for other reviews
-      const otherPagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
+      const otherPagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number }; count:number } = { count: otherTotal };
       if (otherEndIndex < otherTotal) otherPagination.next = { page: otherPage + 1, limit: otherPageSize };
       if (otherStartIndex > 0) otherPagination.prev = { page: otherPage - 1, limit: otherPageSize };
       
@@ -141,7 +157,7 @@ export const deleteReview = async (req: Request, res: Response, next: NextFuncti
          return;
       }
 
-      const reviewId = req.params.id;
+      const reviewId = req.params.reviewId;
       const review: IReview | null = await Review.findById(reviewId);
 
       if (!review) {
@@ -157,12 +173,8 @@ export const deleteReview = async (req: Request, res: Response, next: NextFuncti
       }
 
       if (req.user.role !== "admin" && booking.user.toString() !== req.user._id.toString()) {
-         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
-      }
-
-      if (review.reply) {
-         await Review.deleteOne({ _id: review.reply });
       }
 
       await Review.deleteOne({ _id: reviewId });
