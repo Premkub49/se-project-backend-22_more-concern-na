@@ -212,7 +212,7 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
         returnRooms[i].remainCount = returnRooms[i].remainCount - roomsUsed[index].sumCount;
       }
     }
-    res.status(200).json({success:true, rooms:returnRooms, checkIn: checkIn, checkOut: checkOut});
+    res.status(200).json({success:true, rooms:returnRooms});
   }catch(err:any){
     console.log(err);
     res.status(500).json({success:false, msg:"Server Error"});
