@@ -7,7 +7,7 @@ const router = express.Router({ mergeParams: true });
 
 router.use('/:reviewId/respond', protect, authorize('admin', 'hotelManager'), routerRespond);
 
-router.route('/').post(protect, addReview);
+router.route('/').post(protect, authorize('user'), addReview);
 
 router.route('/:id').put(protect, updateReview).delete(protect,deleteReview);
 
