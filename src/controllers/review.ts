@@ -3,6 +3,39 @@ import Booking, { IBooking } from "../models/Booking";
 import Review, { IReview } from "../models/Review";
 import mongoose from "mongoose";
 
+export async function getReview(req: Request, res: Response, next: NextFunction) {
+   try {
+      if(!req.user) {
+         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         return;
+      }
+
+      const reviewId = req.params.reviewId;
+      const review: IReview | null = await Review.findById(reviewId).populate("reply").populate("booking") as any as IReview | null;
+
+      if (!review) {
+         res.status(404).json({ success: false, msg: "Review not found" });
+         return;
+      }
+
+      const booking: IBooking | null = await Booking.findById(review.booking);
+      if (!booking) {
+         res.status(404).json({ success: false, msg: "Booking not found" });
+         return;
+      }
+
+      if(req.user.role !== "admin" && (req.user.role!=="hotelManager"||req.user.hotel!==booking.hotel)&& booking.user.toString() !== req.user._id.toString()) {
+         res.status(403).json({ success: false, msg: "Not authorized to access this route" });
+         return;
+      }
+
+      res.status(200).json({ success: true, data: review });
+   } catch (error: any) {
+      console.error(error.stack);
+      res.status(500).json({ success: false, msg: "Server Error" });
+   }
+}
+
 export async function addReview(req: Request, res: Response, next: NextFunction) {
    try {
       if(!req.user) {
