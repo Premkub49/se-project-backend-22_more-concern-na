@@ -65,7 +65,14 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
          return;
       }
 
-      if(req.user.role !== "admin" && review.booking.toString() !== req.user._id.toString()) {
+      const booking: IBooking | null = await Booking.findById(review.booking);
+      if (!booking) {
+         res.status(404).json({ success: false, msg: "Booking not found" });
+         return;
+      }
+
+      if(req.user.role !== "admin" && booking.user.toString() !== req.user._id.toString()) {
+         console.log("User ID:", req.user._id.toString());
          res.status(401).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
