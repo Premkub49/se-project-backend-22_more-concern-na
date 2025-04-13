@@ -166,15 +166,15 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
     const hotelId:string = await noSQLInjection(req.params.hotelId);
     const checkIn = new Date(query.checkin)
     const checkOut = new Date(query.checkout)
-    const checkinUTC = new Date(checkIn.getTime() - (checkIn.getTimezoneOffset() * 60000));
-  const checkoutUTC = new Date(checkOut.getTime() - (checkOut.getTimezoneOffset() * 60000));
+    // const checkinUTC = new Date(checkIn.getTime() + (checkIn.getTimezoneOffset() * 60000));
+    // const checkoutUTC = new Date(checkOut.getTime() + (checkOut.getTimezoneOffset() * 60000));
     const roomsUsed =  await Booking.aggregate([
       {
         $match: {
           hotel: new mongoose.Types.ObjectId(hotelId),
           status:{$in:["reserved", "checkedIn"]},
-          startDate: {$gte:checkinUTC,$lte:checkoutUTC},
-          endDate:  {$gte:checkinUTC,$lte:checkoutUTC}
+          startDate: {$gte:checkIn,$lte:checkOut},
+          endDate:  {$gte:checkIn,$lte:checkOut}
         }
       },
       {
@@ -204,7 +204,7 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
         returnRooms[i].remainCount = returnRooms[i].remainCount - roomsUsed[index].sumCount;
       }
     }
-    res.status(200).json({success:true, rooms:returnRooms});
+    res.status(200).json({success:true, rooms:returnRooms, checkIn: checkIn, checkOut: checkOut});
   }catch(err:any){
     console.log(err);
     res.status(500).json({success:false, msg:"Server Error"});

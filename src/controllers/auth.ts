@@ -38,6 +38,9 @@ export const register = async (
 ) => {
   try {
     const reqUser:IUser = req.body;
+    reqUser.point = 0;
+    reqUser.inventory = [];
+    reqUser.role = "user";
     const user = await User.create(reqUser);
     sendTokenResponse(user as unknown as IUser, 200, res);
     return;

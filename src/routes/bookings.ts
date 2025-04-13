@@ -9,7 +9,7 @@ import express from 'express';
 import { authorize, protect } from '../middleware/auth';
 import reviewRouter from './reviews';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });;
 
 router.use('/:bookingId/reviews', reviewRouter);
 
