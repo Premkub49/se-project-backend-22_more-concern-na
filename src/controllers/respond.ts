@@ -40,7 +40,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
       }
 
       const respond = {
-         reply: new mongoose.Schema.Types.ObjectId(req.params.ReviewId),
+         reply: new mongoose.Types.ObjectId(req.params.ReviewId),
          title: req.body.title as string,
          text: req.body.text as string,
       }
