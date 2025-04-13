@@ -12,11 +12,21 @@ interface pagination {
 export function checkDayValid(start: string, end: string, res?: Response) {
   const startDate = new Date(start);
   const endDate = new Date(end);
+  if (startDate > endDate) {
+    if (res)
+      res.status(400).json({ success: false, msg: 'Start date must be before end date' });
+    return false;
+  }
+  if( startDate === endDate) {
+    if (res)
+      res.status(400).json({ success: false, msg: 'Start date and end date must be different' });
+    return false;
+  }
   if (endDate.getTime() - startDate.getTime() > 3 * 24 * 60 * 60 * 1000) {
     if (res)
       res
-        .status(400)
-        .json({ success: false, msg: 'cannot booking exceed 3 days' });
+    .status(400)
+    .json({ success: false, msg: 'cannot booking exceed 3 days' });
     return false;
   }
 
