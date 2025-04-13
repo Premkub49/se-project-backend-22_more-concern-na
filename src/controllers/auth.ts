@@ -113,6 +113,7 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
     data: {
       name: user.name,
       picture: user.picture,
+      tel: user.tel,
       role:user.role,
       point:user.point
     }
@@ -135,3 +136,5 @@ export const getMe = async (
     data: user,
   });
 };
+
+export default sendTokenResponse;
