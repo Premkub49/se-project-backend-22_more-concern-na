@@ -139,3 +139,42 @@ export const getHotelReviews = async (req: Request, res: Response, next: NextFun
       res.status(500).json({ success: false, msg: "Server Error" });
    }
 };
+
+export const deleteReview = async (req: Request, res: Response, next: NextFunction) => {
+   try {
+      if (!req.user) {
+         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         return;
+      }
+
+      const reviewId = req.params.id;
+      const review: IReview | null = await Review.findById(reviewId);
+
+      if (!review) {
+         res.status(404).json({ success: false, msg: "Review not found" });
+         return;
+      }
+
+      const booking: IBooking | null = await Booking.findById(review.booking);
+
+      if (!booking) {
+         res.status(404).json({ success: false, msg: "Booking not found" });
+         return;
+      }
+
+      if (req.user.role !== "admin" && booking.user.toString() !== req.user._id.toString()) {
+         res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+         return;
+      }
+
+      if (review.reply) {
+         await Review.deleteOne({ _id: review.reply });
+      }
+
+      await Review.deleteOne({ _id: reviewId });
+      res.status(200).json({ success: true });
+   } catch (error: any) {
+      console.error(error.stack);
+      res.status(500).json({ success: false, msg: "Server Error" });
+   }
+};
