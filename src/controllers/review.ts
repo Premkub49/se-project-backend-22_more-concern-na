@@ -80,16 +80,17 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
 
 export const getHotelReviews = async (req: Request, res: Response, next: NextFunction) => {
    try {
-      const bookings = await Booking.find({ hotel: req.params.id }).select("_id");
+      const bookings = await Booking.find({ hotel: req.params.id }).select("_id user").populate("user");
       const bookingIds = bookings.map((booking) => booking._id);
+      const yourBooking = bookings.map((booking) => booking.user);
 
       // pagination
       const selfPage = typeof req.query.selfPage === 'string' ? parseInt(req.query.selfPage, 10) : 1;
       const selfPageSize = typeof req.query.selfPageSize === 'string' ? parseInt(req.query.selfPageSize, 10) : 5;
       const selfStartIndex = (selfPage - 1) * selfPageSize;
       const selfEndIndex = selfPage * selfPageSize;
-      const selfTotal = await Review.countDocuments({ booking: { $in: bookingIds }, user: req.user?._id });
-      const selfReview = await Review.find({ booking: { $in: bookingIds }, user: req.user?._id })
+      const selfTotal = await Review.countDocuments({ booking: { $in: bookingIds.filter(id => yourBooking.includes(id)) }});
+      const selfReview = await Review.find({ booking: { $in: bookingIds.filter(id => yourBooking.includes(id)) }})
          .populate("booking")
          .populate("reply")
          .skip(selfStartIndex)
@@ -100,25 +101,12 @@ export const getHotelReviews = async (req: Request, res: Response, next: NextFun
       const otherPageSize = typeof req.query.otherPageSize === 'string' ? parseInt(req.query.otherPageSize, 10) : 5;
       const otherStartIndex = (otherPage - 1) * otherPageSize;
       const otherEndIndex = otherPage * otherPageSize;
-      const otherTotal = await Review.countDocuments({ booking: { $in: bookingIds }, user: { $ne: req.user?._id } });
-      const otherReview = await Review.find({ booking: { $in: bookingIds }, user: { $ne: req.user?._id } })
+      const otherTotal = await Review.countDocuments({ booking: { $in: bookingIds.filter(id => !yourBooking.includes(id)) }});
+      const otherReview = await Review.find({ booking: { $in: bookingIds.filter(id=>!yourBooking.includes(id)) } })
          .populate("booking")
          .populate("reply")
          .skip(otherStartIndex)
          .limit(otherPageSize);
-
-      // pagination for all reviews just use for testing purpose
-      const page = typeof req.query.page === 'string' ? parseInt(req.query.page, 10) : 1;
-      const pageSize = typeof req.query.pageSize === 'string' ? parseInt(req.query.pageSize, 10) : 5;
-      const startIndex = (page - 1) * pageSize;
-      const endIndex = page * pageSize;
-      const total = await Review.countDocuments({});
-      const allReviews = await Review.find({})
-         .populate( "reply")
-         .populate("booking")
-         .skip(startIndex)
-         .limit(page);
-
 
       // executing pagination for self reviews
       const selfPagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
@@ -128,12 +116,11 @@ export const getHotelReviews = async (req: Request, res: Response, next: NextFun
       const otherPagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
       if (otherEndIndex < otherTotal) otherPagination.next = { page: otherPage + 1, limit: otherPageSize };
       if (otherStartIndex > 0) otherPagination.prev = { page: otherPage - 1, limit: otherPageSize };
-      // executing pagination for all reviews
-      const pagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
-      if (endIndex < total) pagination.next = { page: page + 1, limit: pageSize };
-      if (startIndex > 0) pagination.prev = { page: page - 1, limit: pageSize };
-
-      res.status(200).json({ success: true, self: {pagination:selfPagination,data:selfReview}, other: {pagination:otherPagination,data:otherReview}, allReview:{pagination:pagination,data:allReviews}});
+      
+      res.status(200).json({ success: true, 
+         self: {pagination:selfPagination,data:selfReview}, 
+         other: {pagination:otherPagination,data:otherReview}});
+         
    } catch (error: any) {
       console.error(error.stack);
       res.status(500).json({ success: false, msg: "Server Error" });
