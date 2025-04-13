@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import User, { IUser } from '../models/User';
+import Booking from '../models/Booking';
 
 interface IOption {
   expires?: Date;
@@ -38,10 +39,13 @@ export const register = async (
 ) => {
   try {
     const reqUser:IUser = req.body;
-    reqUser.point = 0;
-    reqUser.inventory = [];
-    reqUser.role = "user";
-    const user = await User.create(reqUser);
+    const user = await User.create({
+      name: reqUser.name,
+      tel: reqUser.tel,
+      picture: reqUser.picture,
+      email: reqUser.email,
+      password: reqUser.password,
+    });
     sendTokenResponse(user as unknown as IUser, 200, res);
     return;
   } catch (err: any) {
@@ -124,6 +128,7 @@ export const getMe = async (
   res: Response,
   next: NextFunction,
 ) => {
+  try{
   if (!req.user || !req.user.id) {
     res
       .status(401)
@@ -131,10 +136,41 @@ export const getMe = async (
     return;
   }
   const user = await User.findById(req.user.id);
+  if(!user){
+    res.status(404).json({success: false, msg: "Not found User"});
+    return;
+  }
+  const userBookings = await Booking.find({user: user._id});
+  const activeBookings = userBookings.filter(booking => booking.status === "checkedIn");
+  const upcomingBookings = userBookings.filter(booking => booking.status === "reserved");
+  const pastBookings = userBookings.filter(booking => booking.status === "completed");
   res.status(200).json({
     success: true,
-    data: user,
+    picture: user.picture,
+    name: user.name,
+    email: user.email,
+    tel: user.tel,
+    point: user.point,
+    bookings: {
+      count: userBookings.length,
+      active: {
+        count: activeBookings.length,
+        data: activeBookings
+      },
+      upcoming: {
+        count: activeBookings.length,
+        data: upcomingBookings
+      },
+      past: {
+        count: pastBookings.length,
+        data: pastBookings
+      }
+    }
   });
+  }catch(err: any){
+    console.log(err);
+    res.status(500).json({success: false, msg: "Server Error"})
+  }
 };
 
 export default sendTokenResponse;
