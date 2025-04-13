@@ -18,13 +18,13 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          path: 'booking',
          select: 'hotel'
       }
-      const review: any = await Review.findById(req.params.ReviewId).populate(populateBooking);
+      const review: any = await Review.findById(req.params.reviewId).populate(populateBooking);
       if(!review) {
          res.status(404).json({ success: false, msg: "Review not found" });
          return;
       }
 
-      const respondExists = await Review.findOne({ reply: req.params.ReviewId });
+      const respondExists = await Review.findOne({ reply: req.params.reviewId });
       if(respondExists) {
          res.status(400).json({ success: false, msg: "Respond already exists" });
          return;
