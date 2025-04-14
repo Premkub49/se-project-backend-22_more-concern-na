@@ -67,6 +67,10 @@ export async function updateReport(
     }
 
     const isIgnore = req.body.isIgnore;
+    if(isIgnore === null){
+      res.status(400).json({ success: false, msg: "isIgnore can not be null" });
+      return;
+    }
 
     await Report.updateOne(
       { _id: req.params.id },
