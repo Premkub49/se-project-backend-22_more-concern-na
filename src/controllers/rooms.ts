@@ -7,7 +7,7 @@ function roomCheckHotel(req:Request, res:Response):boolean {
         return true;
     }
     if(req.user.role === "hotelManager"){
-        if(req.user.hotel.toString() !== req.params.hotelId){
+        if(req.user.hotel?.toString() !== req.params.hotelId){
             res.status(401).json({success: false ,msg: "Not authorized to access this route"});
             return true;
         }
