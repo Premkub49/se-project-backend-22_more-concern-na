@@ -14,7 +14,7 @@ export interface IUser {
   email: string;
   password: string;
   role: string;
-  hotel: ObjectId;
+  hotel?: ObjectId;
   point: number;
   inventory: UserRedeemable[];
   resetPasswordToken?: string;
