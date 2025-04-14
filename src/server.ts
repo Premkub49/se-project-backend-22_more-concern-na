@@ -7,7 +7,9 @@ import bookings from './routes/bookings';
 import hotels from './routes/hotels';
 import connectDB from './config/db';
 import reports from './routes/reports'
+import reviews from './routes/reviews';
 import cors from 'cors';
+
 configDotenv({ path: '.env' });
 
 const app: Express = express();
@@ -20,6 +22,7 @@ app.use('/auth', auth);
 app.use('/user',user);
 app.use('/bookings', bookings);
 app.use('/reports', reports);
+app.use('/reviews', reviews);
 
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 5050;
