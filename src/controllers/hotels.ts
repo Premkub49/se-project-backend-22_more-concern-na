@@ -64,13 +64,15 @@ export async function getHotels(
     const hotels = await query;
 
     // executing pagination
-    const pagination: { next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {};
+    const pagination: { count: number; next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {
+      count: 0
+    };
+    pagination.count = hotels.length;
     if (endIndex < total) pagination.next = { page: page + 1, limit };
     if (startIndex > 0) pagination.prev = { page: page - 1, limit };
-
     res
       .status(200)
-      .json({ success: true, count: hotels.length, pagination, data: hotels });
+      .json({ success: true, pagination, data: hotels });
   } catch (err:any) {
     if (err.message) {
       res.status(400).json({ success: false, msg: err.message });
@@ -127,9 +129,15 @@ export async function updateHotel(
 ) {
   try {
     const reqBody:IHotel = req.body;
+    if(reqBody._id){
+      delete (reqBody as Partial<IHotel>)._id;
+    }
+    if(reqBody.name){
+      delete (reqBody as Partial<IHotel>).name;
+    }
     if(req.user && req.user.role === "hotelManager"){
       if(req.params.hotelId !== req.user.hotel as unknown as string){
-        res.status(400).json({success:false, msg:"It isn't your hotel get out."})
+        res.status(403).json({success:false, msg:"It isn't your hotel get out."})
         return;
       }
     }
@@ -204,7 +212,7 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
         returnRooms[i].remainCount = returnRooms[i].remainCount - roomsUsed[index].sumCount;
       }
     }
-    res.status(200).json({success:true, rooms:returnRooms, checkIn: checkIn, checkOut: checkOut});
+    res.status(200).json({success:true, rooms:returnRooms});
   }catch(err:any){
     console.log(err);
     res.status(500).json({success:false, msg:"Server Error"});
