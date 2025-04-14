@@ -1,6 +1,6 @@
 import express from 'express';
 import { authorize, protect } from '../middleware/auth';
-import { addReview, deleteReview, updateReview, getReview } from '../controllers/review';
+import { addReview, deleteReview, updateReview, getReview } from '../controllers/reviews';
 import routerRespond from './respond';
 
 const router = express.Router({ mergeParams: true });

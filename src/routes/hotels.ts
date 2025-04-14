@@ -3,7 +3,7 @@ import { addHotel, checkAvailable, deleteHotel, getHotel, getHotels, updateHotel
 import { authorize, protect } from '../middleware/auth';
 import bookingRouter from './bookings';
 import roomRouter from './rooms';
-import { getHotelReviews } from '../controllers/review';
+import { getHotelReviews } from '../controllers/reviews';
 
 const router = express.Router();
 
