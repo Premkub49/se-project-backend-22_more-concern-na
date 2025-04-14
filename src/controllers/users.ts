@@ -54,6 +54,9 @@ export async function updateRole(req: Request, res: Response, next: NextFunction
       res.status(400).json({ success: false, msg: "Invalid user ID" });
       return;
     }
+    if(req.body.role === "hotelManager"){
+      await User.updateOne({_id: req.body.user},{$set:{hotel: req.body.hotel}});
+    }
     await User.updateOne({_id: req.body.user},{$set:{role: req.body.role}});
     res.status(200).json({success: true})
   }catch(err:any){
