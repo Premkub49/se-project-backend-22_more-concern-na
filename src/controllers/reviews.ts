@@ -42,7 +42,10 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
          res.status(401).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
-
+      if(!req.params.bookingId){
+         res.status(400).json({ success: false, msg: "Booking ID is required" });
+         return;
+      }
       const bookingId = req.params.bookingId;
       const booking: IBooking | null = await Booking.findById(bookingId)
 
