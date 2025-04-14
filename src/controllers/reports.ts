@@ -72,6 +72,12 @@ export async function updateReport(
       return;
     }
 
+    const report = await Report.findById(req.params.id);
+    if (!report) {
+      res.status(404).json({ success: false, msg: "Report not found" });
+      return;
+    }
+
     await Report.updateOne(
       { _id: req.params.id },
       { $set: { isIgnore } }
