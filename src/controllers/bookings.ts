@@ -435,6 +435,10 @@ export async function updateBooking(
 
     const newBooking: IBooking = req.body;
 
+    if(req.user.role !== 'admin') {
+      newBooking.status = booking.status;
+    }
+
     if (
       !checkDayValid(
         newBooking.startDate.toString(),
