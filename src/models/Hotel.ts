@@ -1,10 +1,10 @@
 import mongoose, { ObjectId } from 'mongoose';
 export interface Rooms {
+  _id: ObjectId;
   roomType: string;
   picture?: string;
   capacity: number;
   maxCount: number;
-  remainCount: number;
   price: number;
 }
 
@@ -29,7 +29,8 @@ const HotelSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, 'Please add a name'],
-      trim: true,
+      unique:true,
+      trim:true
     },
     description: {
       type: String,
@@ -72,6 +73,11 @@ const HotelSchema = new mongoose.Schema(
     rooms: {
       type: [
         {
+          _id: {
+            type: mongoose.Schema.Types.ObjectId,
+            unique: true,
+            default: () => new mongoose.Types.ObjectId()
+          },
           roomType: {
             type: String,
             required: [true, 'Please add a room type'],
@@ -98,6 +104,13 @@ const HotelSchema = new mongoose.Schema(
         },
       ],
       required: [true, 'Please add rooms'],
+      validate: {
+        validator: function (rooms: Rooms[]){
+          const uniqueRoomTypes = new Set(rooms.map((room)=>room.roomType));
+          return uniqueRoomTypes.size === rooms.length;
+        },
+        message: 'Room types must be unique',
+      }
     },
     ratingSum: {
       type: Number,
@@ -111,6 +124,7 @@ const HotelSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    autoIndex: true
   },
 );
 

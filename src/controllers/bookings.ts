@@ -131,7 +131,7 @@ export async function checkRoomsValidAndCalculatePrice(
       (24 * 60 * 60 * 1000),
   );
 
-  price = price * (dayDifference + 1);
+  price = price * dayDifference;
 
   return { valid: true, price: price };
 }
@@ -412,7 +412,6 @@ export async function updateBooking(
     const bookingId = req.params.id;
 
     const booking: IBooking | null = await Booking.findById(bookingId);
-    console.log(bookingId);
     if (!booking) {
       res.status(404).json({ success: false, msg: 'Not Found Booking' });
       return;

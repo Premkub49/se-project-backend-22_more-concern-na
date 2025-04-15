@@ -8,7 +8,7 @@ import {
 import express from 'express';
 import { authorize, protect } from '../middleware/auth';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });;
 
 router.route('/').get(protect, getBookings).post(protect,authorize("user"),addBooking);
 
