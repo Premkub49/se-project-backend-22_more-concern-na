@@ -281,11 +281,11 @@ export async function getBooking(
     };
     const populateHotel = {
       path: 'hotel',
-      select: 'name picture ratingSum ratingCount',
+      select: 'name picture buildingNumber street district province postalCode ratingSum ratingCount',
     };
     const booking: PBooking | null = (await Booking.findById(
       bookingId,
-    ).populate(populateHotel)) as any as PBooking | null;
+    ).populate(populateHotel).populate(populateUser)) as any as PBooking | null;
 
     if (!booking) {
       res.status(404).json({ success: false, msg: 'Not Found Booking' });
@@ -293,7 +293,7 @@ export async function getBooking(
     }
 
     if (req.user.role === 'hotelManager') {
-      if (booking.hotel._id.toString() !== req.user.hotel.toString()) {
+      if (booking.hotel._id.toString() !== req.user.hotel?.toString()) {
         res
           .status(401)
           .json({ success: false, msg: 'Not authorized to access this route' });
