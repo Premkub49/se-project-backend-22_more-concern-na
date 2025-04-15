@@ -577,3 +577,61 @@ export async function checkInBooking(
   }
 }
 
+export async function completeBooking(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user) {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    const bookingId = req.params.id;
+    const booking: IBooking | null = await Booking.findById(bookingId);
+    if (!booking) {
+      res.status(404).json({ success: false, msg: 'Not Found Booking' });
+      return;
+    }
+
+    if (req.user.role === 'user') {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    if (req.user.role === 'hotelManager') {
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+      if (booking.hotel.toString() !== req.user.hotel.toString()) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+    }
+
+    if (booking.status !== 'checkedIn') {
+      res.status(400).json({ success: false, msg: 'Booking is not checkedIn' });
+      return;
+    }
+
+    await Booking.updateOne({ _id: bookingId }, { status: 'completed' });
+
+    res.status(200).json({
+      success: true,
+    });
+  }
+  catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+}
