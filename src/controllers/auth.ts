@@ -8,6 +8,17 @@ interface IOption {
   secure?: boolean;
 }
 
+const userDataResponse = (user:IUser) => {
+  return {
+    name: user.name,
+    picture: user.picture,
+    tel: user.tel,
+    hotel: user.hotel,
+    role:user.role,
+    point:user.point
+  }
+}
+
 const errMongoChecker = (err: any) => {
   if (err.code === 11000) {
     return 'Email Already Exists';
@@ -114,14 +125,7 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   res.status(statusCode).cookie('token', token, options).json({
     success: true,
     token,
-    data: {
-      name: user.name,
-      picture: user.picture,
-      tel: user.tel,
-      hotel: user.hotel,
-      role:user.role,
-      point:user.point
-    }
+    data: userDataResponse(user)
   });
 };
 export const getMe = async (
@@ -136,7 +140,7 @@ export const getMe = async (
       .json({ success: false, msg: 'Not authorized to access this resource' });
     return;
   }
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id) as any as IUser;
   if(!user){
     res.status(404).json({success: false, msg: "Not found User"});
     return;
@@ -145,13 +149,10 @@ export const getMe = async (
   const activeBookings = userBookings.filter(booking => booking.status === "checkedIn");
   const upcomingBookings = userBookings.filter(booking => booking.status === "reserved");
   const pastBookings = userBookings.filter(booking => booking.status === "completed");
+  const userData = userDataResponse(user);
   res.status(200).json({
     success: true,
-    picture: user.picture,
-    name: user.name,
-    email: user.email,
-    tel: user.tel,
-    point: user.point,
+    ...userData,
     bookings: {
       count: userBookings.length,
       active: {
@@ -159,7 +160,7 @@ export const getMe = async (
         data: activeBookings
       },
       upcoming: {
-        count: activeBookings.length,
+        count: upcomingBookings.length,
         data: upcomingBookings
       },
       past: {
