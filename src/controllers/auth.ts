@@ -118,6 +118,7 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
       name: user.name,
       picture: user.picture,
       tel: user.tel,
+      hotel: user.hotel,
       role:user.role,
       point:user.point
     }
