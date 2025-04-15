@@ -1,5 +1,7 @@
 import {
   addBooking,
+  checkInBooking,
+  completeBooking,
   deleteBooking,
   getBooking,
   getBookings,
@@ -9,6 +11,9 @@ import express from 'express';
 import { authorize, protect } from '../middleware/auth';
 
 const router = express.Router({ mergeParams: true });;
+
+router.route('/:id/checkIn').put(protect, authorize("admin", "hotelManager"), checkInBooking);
+router.route('/:id/completed').put(protect, authorize("admin", "hotelManager"), completeBooking);
 
 router.route('/').get(protect, getBookings).post(protect,authorize("user"),addBooking);
 
