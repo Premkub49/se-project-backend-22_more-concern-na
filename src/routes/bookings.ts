@@ -1,5 +1,7 @@
 import {
   addBooking,
+  checkInBooking,
+  completeBooking,
   deleteBooking,
   getBooking,
   getBookings,
@@ -12,6 +14,9 @@ import reviewRouter from './reviews';
 const router = express.Router({ mergeParams: true });;
 
 router.use('/:bookingId/reviews', reviewRouter);
+
+router.route('/:id/checkIn').put(protect, authorize("admin", "hotelManager"), checkInBooking);
+router.route('/:id/completed').put(protect, authorize("admin", "hotelManager"), completeBooking);
 
 router.route('/').get(protect, getBookings).post(protect,authorize("user"),addBooking);
 
