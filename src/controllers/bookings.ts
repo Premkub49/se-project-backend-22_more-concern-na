@@ -281,11 +281,11 @@ export async function getBooking(
     };
     const populateHotel = {
       path: 'hotel',
-      select: 'name picture ratingSum ratingCount',
+      select: 'name picture buildingNumber street district province postalCode ratingSum ratingCount',
     };
     const booking: PBooking | null = (await Booking.findById(
       bookingId,
-    ).populate(populateHotel)) as any as PBooking | null;
+    ).populate(populateHotel).populate(populateUser)) as any as PBooking | null;
 
     if (!booking) {
       res.status(404).json({ success: false, msg: 'Not Found Booking' });
@@ -293,7 +293,7 @@ export async function getBooking(
     }
 
     if (req.user.role === 'hotelManager') {
-      if (booking.hotel._id.toString() !== req.user.hotel.toString()) {
+      if (booking.hotel._id.toString() !== req.user.hotel?.toString()) {
         res
           .status(401)
           .json({ success: false, msg: 'Not authorized to access this route' });
@@ -435,6 +435,10 @@ export async function updateBooking(
 
     const newBooking: IBooking = req.body;
 
+    if(req.user.role !== 'admin') {
+      newBooking.status = booking.status;
+    }
+
     if (
       !checkDayValid(
         newBooking.startDate.toString(),
@@ -510,6 +514,123 @@ export async function deleteBooking(
       success: true,
     });
   } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+}
+
+export async function checkInBooking(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!req.user) {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    const bookingId = req.params.id;
+    const booking: IBooking | null = await Booking.findById(bookingId);
+    if (!booking) {
+      res.status(404).json({ success: false, msg: 'Not Found Booking' });
+      return;
+    }
+
+    if (req.user.role === 'user') {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    if (req.user.role === 'hotelManager') {
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+      if (booking.hotel.toString() !== req.user.hotel.toString()) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+    }
+
+    if (booking.status !== 'reserved') {
+      res.status(400).json({ success: false, msg: 'Booking is not reserved' });
+      return;
+    }
+
+    await Booking.updateOne({ _id: bookingId }, { status: 'checkedIn' });
+
+    res.status(200).json({
+      success: true,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+}
+
+export async function completeBooking(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user) {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    const bookingId = req.params.id;
+    const booking: IBooking | null = await Booking.findById(bookingId);
+    if (!booking) {
+      res.status(404).json({ success: false, msg: 'Not Found Booking' });
+      return;
+    }
+
+    if (req.user.role === 'user') {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    if (req.user.role === 'hotelManager') {
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+      if (booking.hotel.toString() !== req.user.hotel.toString()) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+    }
+
+    if (booking.status !== 'checkedIn') {
+      res.status(400).json({ success: false, msg: 'Booking is not checkedIn' });
+      return;
+    }
+
+    await Booking.updateOne({ _id: bookingId }, { status: 'completed' });
+
+    res.status(200).json({
+      success: true,
+    });
+  }
+  catch (err) {
     console.log(err);
     res.status(500).json({ success: false, msg: 'Server error' });
   }
