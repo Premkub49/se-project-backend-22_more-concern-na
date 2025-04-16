@@ -159,7 +159,7 @@ export async function getBookings(
     };
     const populateHotel = {
       path: 'hotel',
-      select: '_id name picture ratingSum ratingCount',
+      select: '_id name tel buildingNumber street district province postalCode picture ratingSum ratingCount',
     };
 
     if (req.user.role === 'admin') {
@@ -281,7 +281,7 @@ export async function getBooking(
     };
     const populateHotel = {
       path: 'hotel',
-      select: 'name picture buildingNumber street district province postalCode ratingSum ratingCount',
+      select: 'name picture tel buildingNumber street district province postalCode ratingSum ratingCount',
     };
     const booking: PBooking | null = (await Booking.findById(
       bookingId,
