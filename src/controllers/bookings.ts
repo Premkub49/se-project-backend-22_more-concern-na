@@ -125,9 +125,10 @@ export async function checkRoomsValidAndCalculatePrice(
 
     price += room.count * roomType.price;
   }
-
+  const endDate = new Date(booking.endDate);
+  const startDate = new Date(booking.startDate);
   const dayDifference = Math.ceil(
-    (booking.endDate.getTime() - booking.startDate.getTime()) /
+    (endDate.getTime() - startDate.getTime()) /
       (24 * 60 * 60 * 1000),
   );
 
