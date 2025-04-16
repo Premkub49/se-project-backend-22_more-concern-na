@@ -81,7 +81,7 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
          return;
       }
 
-      const hotel = Hotel.findById(booking.hotel) as any;
+      const hotel = await Hotel.findById(booking.hotel) as any;
       if (!hotel) {
          res.status(404).json({ success: false, msg: "Hotel in booking not found" });
          return;
@@ -93,7 +93,7 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
       hotel.ratingSum += review.rating;
       hotel.ratingCount += 1;
 
-      Promise.all([Review.create(review), hotel.save()]);
+      await Promise.all([Review.create(review), hotel.save()]);
       res.status(201).json({ success: true });
    } catch (error: any) {
       console.error(error.stack);
@@ -155,7 +155,7 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
          return;
       }
 
-      Promise.all([Review.updateOne({ _id: reviewId }, { $set: { rating, title, text } }), hotel.save()]);
+      await Promise.all([Review.updateOne({ _id: reviewId }, { $set: { rating, title, text } }), hotel.save()]);
       res.status(200).json({ success: true });
    } catch (error: any) {
       console.error(error.stack);
