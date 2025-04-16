@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import Booking, { IBooking } from "../models/Booking";
 import Review, { IReview } from "../models/Review";
 import mongoose from "mongoose";
-import Hotel from "models/Hotel";
+import Hotel from "../models/Hotel";
 
 export async function getReview(req: Request, res: Response, next: NextFunction) {
    try {
@@ -76,8 +76,14 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
          return;
       }
       
-      if (!req.body.rating || !req.body.title || !req.body.text) {
+      const review: IReview = req.body;
+      if (!review.rating || !review.title || !review.text) {
          res.status(400).json({ success: false, msg: "Rating, title, and text are required" });
+         return;
+      }
+
+      if(review.rating < 1 || review.rating > 5) {
+         res.status(400).json({ success: false, msg: "Rating must be between 1 and 5" });
          return;
       }
 
@@ -87,7 +93,6 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
          return;
       }
       
-      const review: IReview = req.body;
       review.booking = new mongoose.Types.ObjectId(bookingId) as any;
 
       hotel.ratingSum += review.rating;
@@ -144,16 +149,21 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
          return;
       }
 
-      if (req.body.rating) {
-         hotel.ratingSum -= review.rating;
-         hotel.ratingSum += req.body.rating;
-      }
-
+      
       const { rating, title, text } = req.body;
+      
       if (!rating || !title || !text) {
          res.status(400).json({ success: false, msg: "Rating, title, and text are required" });
          return;
       }
+
+      if(rating < 1 || rating > 5) {
+         res.status(400).json({ success: false, msg: "Rating must be between 1 and 5" });
+         return;
+      }
+      
+      hotel.ratingSum -= review.rating;
+      hotel.ratingSum += rating;
 
       await Promise.all([Review.updateOne({ _id: reviewId }, { $set: { rating, title, text } }), hotel.save()]);
       res.status(200).json({ success: true });
