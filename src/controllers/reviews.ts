@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import Booking, { IBooking } from "../models/Booking";
 import Review, { IReview } from "../models/Review";
 import mongoose from "mongoose";
+import Hotel from "models/Hotel";
 
 export async function getReview(req: Request, res: Response, next: NextFunction) {
    try {
@@ -80,10 +81,19 @@ export async function addReview(req: Request, res: Response, next: NextFunction)
          return;
       }
 
+      const hotel = Hotel.findById(booking.hotel) as any;
+      if (!hotel) {
+         res.status(404).json({ success: false, msg: "Hotel in booking not found" });
+         return;
+      }
+      
       const review: IReview = req.body;
       review.booking = new mongoose.Types.ObjectId(bookingId) as any;
 
-      await Review.create(review);
+      hotel.ratingSum += review.rating;
+      hotel.ratingCount += 1;
+
+      Promise.all([Review.create(review), hotel.save()]);
       res.status(201).json({ success: true });
    } catch (error: any) {
       console.error(error.stack);
@@ -111,6 +121,11 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
          return;
       }
 
+      if(!review.rating) {
+         res.status(400).json({ success: false, msg: "Review does not have a rating" });
+         return;
+      }
+
       const booking: IBooking | null = await Booking.findById(review.booking);
       if (!booking) {
          res.status(404).json({ success: false, msg: "Booking not found" });
@@ -123,13 +138,24 @@ export async function updateReview(req: Request, res: Response, next: NextFuncti
          return;
       }
 
+      const hotel = await Hotel.findById(booking.hotel) as any;
+      if (!hotel) {
+         res.status(404).json({ success: false, msg: "Hotel in booking not found" });
+         return;
+      }
+
+      if (req.body.rating) {
+         hotel.ratingSum -= review.rating;
+         hotel.ratingSum += req.body.rating;
+      }
+
       const { rating, title, text } = req.body;
       if (!rating || !title || !text) {
          res.status(400).json({ success: false, msg: "Rating, title, and text are required" });
          return;
       }
 
-      await Review.updateOne({ _id: reviewId }, { $set: { rating, title, text } });
+      Promise.all([Review.updateOne({ _id: reviewId }, { $set: { rating, title, text } }), hotel.save()]);
       res.status(200).json({ success: true });
    } catch (error: any) {
       console.error(error.stack);
