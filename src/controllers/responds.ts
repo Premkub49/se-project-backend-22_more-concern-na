@@ -34,7 +34,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          res.status(404).json({ success: false, msg: "Booking not found" });
          return;
       }
-      if(req.user.role !== 'admin' && review.booking.hotel.toString() !== req.user.hotel.toString()) {
+      if(req.user.role !== 'admin' && review.booking.hotel.toString() !== req.user.hotel?.toString()) {
          res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
@@ -81,7 +81,7 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
          return;
       }
 
-      if(req.user.role !== 'admin' && review.booking.hotel.toString() !== req.user.hotel.toString()) {
+      if(req.user.role !== 'admin' && review.booking.hotel.toString() !== req.user.hotel?.toString()) {
          res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }

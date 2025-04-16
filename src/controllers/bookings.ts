@@ -317,7 +317,7 @@ export async function getBooking(
 
     res.status(200).json({
       success: true,
-      data: booking,
+      booking: booking,
     });
   } catch (err) {
     console.log(err);
