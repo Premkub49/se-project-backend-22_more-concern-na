@@ -11,6 +11,7 @@ interface IOption {
 const userDataResponse = (user:IUser) => {
   return {
     name: user.name,
+    email: user.email,
     picture: user.picture,
     tel: user.tel,
     hotel: user.hotel,
