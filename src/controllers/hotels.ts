@@ -204,9 +204,9 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
     ])
     const hotel = await Hotel.find({_id:hotelId});
     const rooms = hotel[0].rooms;
-    let returnRooms: { type: string; remainCount: number }[] = [];
+    let returnRooms: { roomType: string; remainCount: number }[] = [];
     for(let i=0;i<rooms.length;i++){
-      returnRooms.push({type: rooms[i].roomType,remainCount: rooms[i].maxCount});
+      returnRooms.push({roomType: rooms[i].roomType,remainCount: rooms[i].maxCount});
       const index = roomsUsed.findIndex(({type})=>type===rooms[i].roomType);
       if(index !== -1){
         returnRooms[i].remainCount = returnRooms[i].remainCount - roomsUsed[index].sumCount;
