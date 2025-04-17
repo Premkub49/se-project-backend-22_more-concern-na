@@ -20,7 +20,22 @@ export async function getReview(
     const reviewId = req.params.reviewId;
     const review: IReview | null = (await Review.findById(reviewId)
       .populate('reply')
-      .populate('booking')) as any as IReview | null;
+      .populate('booking') 
+      .populate({
+      path: 'booking',
+      populate: {
+        path: 'user',
+        model: 'User',
+      },
+     })
+      .populate({
+      path: 'booking',
+      populate: {
+        path: 'hotel',
+        model: 'Hotel',
+      },
+     })
+   ) as any as IReview | null;
 
     if (!review) {
       res.status(404).json({ success: false, msg: 'Review not found' });
@@ -263,13 +278,20 @@ export const getHotelReviews = async (
     const selfTotal = await Review.countDocuments({
       booking: { $in: bookingIds.filter((id) => yourBooking.includes(id)) },
     });
-    const selfReview = await Review.find({
-      booking: { $in: bookingIds.filter((id) => yourBooking.includes(id)) },
-    })
-      .populate('booking')
-      .populate('reply')
-      .skip(selfStartIndex)
-      .limit(selfPageSize);
+   const selfReview = await Review.find({
+     booking: { $in: bookingIds.filter((id) => yourBooking.includes(id)) },
+   })
+     .populate('booking')
+     .populate('reply')
+     .populate({
+      path: 'booking',
+      populate: {
+        path: 'user',
+        model: 'User',
+      },
+     })
+     .skip(selfStartIndex)
+     .limit(selfPageSize);
 
     // pagination for other reviews
     const otherPage =
@@ -290,6 +312,13 @@ export const getHotelReviews = async (
     })
       .populate('booking')
       .populate('reply')
+      .populate({
+      path: 'booking',
+      populate: {
+        path: 'user',
+        model: 'User',
+      },
+     })
       .skip(otherStartIndex)
       .limit(otherPageSize);
 
