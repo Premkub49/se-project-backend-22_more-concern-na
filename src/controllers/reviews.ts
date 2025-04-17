@@ -242,8 +242,13 @@ export const getHotelReviews = async (
       .select('_id user')
       .populate('user');
     const bookingIds = bookings.map((booking) => booking._id);
-    const yourBooking = bookings.map((booking) => booking.user);
-
+    const yourBooking = bookings
+     .filter((booking) => req.user && booking.user._id.toString() === req.user._id.toString())
+     .map((booking) => booking._id);
+    console.log(req.user)
+    console.log('yourBooking', yourBooking);
+    console.log('bookingIds', bookingIds);
+    
     // pagination
     const selfPage =
       typeof req.query.selfPage === 'string'
