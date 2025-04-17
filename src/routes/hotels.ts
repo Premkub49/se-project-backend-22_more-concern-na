@@ -1,6 +1,6 @@
 import express from 'express';
 import { addHotel, checkAvailable, deleteHotel, getHotel, getHotels, updateHotel } from '../controllers/hotels';
-import { authorize, protect } from '../middleware/auth';
+import { authorize, getRequestToken, protect } from '../middleware/auth';
 import bookingRouter from './bookings';
 import roomRouter from './rooms';
 import { getHotelReviews } from '../controllers/reviews';
@@ -16,6 +16,6 @@ router.route('/:hotelId')
 .delete(protect,authorize("admin"),deleteHotel);
 
 router.route('/:hotelId/available').get(checkAvailable);
-router.get('/:hotelId/reviews', getHotelReviews);
+router.get('/:hotelId/reviews',getRequestToken, getHotelReviews);
 
 export default router;
