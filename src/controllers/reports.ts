@@ -67,6 +67,16 @@ export async function updateReport(
     }
 
     const isIgnore = req.body.isIgnore;
+    if(isIgnore === null){
+      res.status(400).json({ success: false, msg: "isIgnore can not be null" });
+      return;
+    }
+
+    const report = await Report.findById(req.params.id);
+    if (!report) {
+      res.status(404).json({ success: false, msg: "Report not found" });
+      return;
+    }
 
     await Report.updateOne(
       { _id: req.params.id },

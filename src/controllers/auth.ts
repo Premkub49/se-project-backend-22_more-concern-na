@@ -1,10 +1,23 @@
 import { NextFunction, Request, Response } from 'express';
 import User, { IUser } from '../models/User';
+import Booking from '../models/Booking';
 
 interface IOption {
   expires?: Date;
   httpOnly?: boolean;
   secure?: boolean;
+}
+
+const userDataResponse = (user:IUser) => {
+  return {
+    name: user.name,
+    email: user.email,
+    picture: user.picture,
+    tel: user.tel,
+    hotel: user.hotel,
+    role:user.role,
+    point:user.point
+  }
 }
 
 const errMongoChecker = (err: any) => {
@@ -38,10 +51,13 @@ export const register = async (
 ) => {
   try {
     const reqUser:IUser = req.body;
-    reqUser.point = 0;
-    reqUser.inventory = [];
-    reqUser.role = "user";
-    const user = await User.create(reqUser);
+    const user = await User.create({
+      name: reqUser.name,
+      tel: reqUser.tel,
+      picture: reqUser.picture,
+      email: reqUser.email,
+      password: reqUser.password,
+    });
     sendTokenResponse(user as unknown as IUser, 200, res);
     return;
   } catch (err: any) {
@@ -110,12 +126,7 @@ const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   res.status(statusCode).cookie('token', token, options).json({
     success: true,
     token,
-    data: {
-      name: user.name,
-      picture: user.picture,
-      role:user.role,
-      point:user.point
-    }
+    data: userDataResponse(user)
   });
 };
 export const getMe = async (
@@ -123,15 +134,46 @@ export const getMe = async (
   res: Response,
   next: NextFunction,
 ) => {
+  try{
   if (!req.user || !req.user.id) {
     res
       .status(401)
       .json({ success: false, msg: 'Not authorized to access this resource' });
     return;
   }
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(req.user.id) as any as IUser;
+  if(!user){
+    res.status(404).json({success: false, msg: "Not found User"});
+    return;
+  }
+  const userBookings = await Booking.find({user: user._id});
+  const activeBookings = userBookings.filter(booking => booking.status === "checkedIn");
+  const upcomingBookings = userBookings.filter(booking => booking.status === "reserved");
+  const pastBookings = userBookings.filter(booking => booking.status === "completed");
+  const userData = userDataResponse(user);
   res.status(200).json({
     success: true,
-    data: user,
+    ...userData,
+    bookings: {
+      count: userBookings.length,
+      active: {
+        count: activeBookings.length,
+        data: activeBookings
+      },
+      upcoming: {
+        count: upcomingBookings.length,
+        data: upcomingBookings
+      },
+      past: {
+        count: pastBookings.length,
+        data: pastBookings
+      }
+    }
   });
+  }catch(err: any){
+    console.log(err);
+    res.status(500).json({success: false, msg: "Server Error"})
+  }
 };
+
+export default sendTokenResponse;

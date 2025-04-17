@@ -3,14 +3,30 @@ import { NextFunction, Request, Response } from 'express';
 import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
 import Hotel, { IHotel, Rooms } from '../models/Hotel';
 
+interface pagination {
+  next?: { page: number; limit: number; };
+  prev?: { page: number; limit: number; };
+  count?: number;
+}
+
 export function checkDayValid(start: string, end: string, res?: Response) {
   const startDate = new Date(start);
   const endDate = new Date(end);
+  if (startDate > endDate) {
+    if (res)
+      res.status(400).json({ success: false, msg: 'Start date must be before end date' });
+    return false;
+  }
+  if( startDate === endDate) {
+    if (res)
+      res.status(400).json({ success: false, msg: 'Start date and end date must be different' });
+    return false;
+  }
   if (endDate.getTime() - startDate.getTime() > 3 * 24 * 60 * 60 * 1000) {
     if (res)
       res
-        .status(400)
-        .json({ success: false, msg: 'cannot booking exceed 3 days' });
+    .status(400)
+    .json({ success: false, msg: 'cannot booking exceed 3 days' });
     return false;
   }
 
@@ -109,9 +125,10 @@ export async function checkRoomsValidAndCalculatePrice(
 
     price += room.count * roomType.price;
   }
-
+  const endDate = new Date(booking.endDate);
+  const startDate = new Date(booking.startDate);
   const dayDifference = Math.ceil(
-    (booking.endDate.getTime() - booking.startDate.getTime()) /
+    (endDate.getTime() - startDate.getTime()) /
       (24 * 60 * 60 * 1000),
   );
 
@@ -133,20 +150,29 @@ export async function getBookings(
       return;
     }
 
-    let bookings: PBooking[] | null;
+    let queryPast: any;
+    let queryActive: any;
+    let queryUpcoming: any;
+
     const populateUser = {
       path: 'user',
       select: '_id name email tel point',
     };
     const populateHotel = {
       path: 'hotel',
-      select: '_id name picture ratingSum ratingCount',
+      select: '_id name tel buildingNumber street district province postalCode picture ratingSum ratingCount',
     };
 
     if (req.user.role === 'admin') {
-      bookings = (await Booking.find()
+      queryPast = Booking.find({ status: 'completed' })
         .populate(populateUser)
-        .populate(populateHotel)) as any as PBooking[] | null;
+        .populate(populateHotel);
+      queryActive = Booking.find({ status: 'checkedIn' })
+        .populate(populateUser)
+        .populate(populateHotel);
+      queryUpcoming = Booking.find({ status: 'reserved' })
+        .populate(populateUser)
+        .populate(populateHotel);
     } else if (req.user.role === 'hotelManager') {
       if (!req.user.hotel) {
         res
@@ -154,18 +180,82 @@ export async function getBookings(
           .json({ success: false, msg: 'Not authorized to access this route' });
         return;
       }
-      bookings = (await Booking.find({ hotel: req.user.hotel })
+      queryPast = Booking.find({ hotel: req.user.hotel, status: 'completed' })
         .populate(populateUser)
-        .populate(populateHotel)) as any as PBooking[] | null;
+        .populate(populateHotel);
+      queryActive = Booking.find({ hotel: req.user.hotel, status: 'checkedIn' })
+        .populate(populateUser)
+        .populate(populateHotel);
+      queryUpcoming = Booking.find({ hotel: req.user.hotel, status: 'reserved' })
+        .populate(populateUser)
+        .populate(populateHotel);
     } else {
-      bookings = (await Booking.find({ user: req.user._id })
+      queryPast = Booking.find({ user: req.user._id, status: 'completed' })
         .populate(populateUser)
-        .populate(populateHotel)) as any as PBooking[] | null;
+        .populate(populateHotel);
+      queryActive = Booking.find({ user: req.user._id, status: 'checkedIn' })
+        .populate(populateUser)
+        .populate(populateHotel);
+      queryUpcoming = Booking.find({ user: req.user._id, status: 'reserved' })
+        .populate(populateUser)
+        .populate(populateHotel);
     }
 
+    if (!queryPast && !queryActive && !queryUpcoming) {
+      res.status(404).json({ success: false, msg: 'Not Found Booking' });
+      return;
+    }
+
+    const pastPage = parseInt(req.query.pastPage as string) || 1;
+    const pastPageSize = parseInt(req.query.pastPageSize as string) || 10;
+    
+    const activePage = parseInt(req.query.activePage as string) || 1;
+    const activePageSize = parseInt(req.query.activePageSize as string) || 10;
+
+    const upcomingPage = parseInt(req.query.upcomingPage as string) || 1;
+    const upcomingPageSize = parseInt(req.query.upcomingPageSize as string) || 10;
+
+    const past: { pagination?: pagination, data?: IBooking[] } = {};
+    const active: { pagination?: pagination, data?: IBooking[] } = {};
+    const upcoming: { pagination?: pagination, data?: IBooking[] } = {};
+
+    for (const { query, data, page, pageSize } of [
+      { query: queryPast, data: past, page: pastPage, pageSize: pastPageSize },
+      { query: queryActive, data: active, page: activePage, pageSize: activePageSize },
+      { query: queryUpcoming, data: upcoming, page: upcomingPage, pageSize: upcomingPageSize },
+    ]) {
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = page * pageSize;
+      const total = await query.clone().countDocuments();
+      
+      if (!data.pagination) {
+        data.pagination = {};
+      }
+      if(endIndex < total) {
+        if(page == Math.ceil(total / pageSize) - 1) {
+          data.pagination.next = { page: page + 1 , limit: total % pageSize };
+        }
+        else {
+          data.pagination.next = { page: page + 1, limit: pageSize };
+        }
+      }
+      if(startIndex > 0) {
+        data.pagination.prev = { page: page - 1, limit: pageSize };
+      }
+
+      data.data = await query
+        .skip(startIndex)
+        .limit(pageSize)
+        .sort({ createdAt: -1 })
+      data.pagination.count = data.data?.length || 0;
+    }
+    const total = await Booking.countDocuments();
     res.status(200).json({
       success: true,
-      bookings: bookings,
+      total,
+      past: past,
+      active: active,
+      upcoming: upcoming,
     });
   } catch (err) {
     console.log(err);
@@ -193,11 +283,11 @@ export async function getBooking(
     };
     const populateHotel = {
       path: 'hotel',
-      select: 'name picture ratingSum ratingCount',
+      select: 'name picture tel buildingNumber street district province postalCode ratingSum ratingCount',
     };
     const booking: PBooking | null = (await Booking.findById(
       bookingId,
-    ).populate(populateHotel)) as any as PBooking | null;
+    ).populate(populateHotel).populate(populateUser)) as any as PBooking | null;
 
     if (!booking) {
       res.status(404).json({ success: false, msg: 'Not Found Booking' });
@@ -205,7 +295,7 @@ export async function getBooking(
     }
 
     if (req.user.role === 'hotelManager') {
-      if (booking.hotel._id.toString() !== req.user.hotel.toString()) {
+      if (booking.hotel._id.toString() !== req.user.hotel?.toString()) {
         res
           .status(401)
           .json({ success: false, msg: 'Not authorized to access this route' });
@@ -347,6 +437,10 @@ export async function updateBooking(
 
     const newBooking: IBooking = req.body;
 
+    if(req.user.role !== 'admin') {
+      newBooking.status = booking.status;
+    }
+
     if (
       !checkDayValid(
         newBooking.startDate.toString(),
@@ -422,6 +516,123 @@ export async function deleteBooking(
       success: true,
     });
   } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+}
+
+export async function checkInBooking(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!req.user) {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    const bookingId = req.params.id;
+    const booking: IBooking | null = await Booking.findById(bookingId);
+    if (!booking) {
+      res.status(404).json({ success: false, msg: 'Not Found Booking' });
+      return;
+    }
+
+    if (req.user.role === 'user') {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    if (req.user.role === 'hotelManager') {
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+      if (booking.hotel.toString() !== req.user.hotel.toString()) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+    }
+
+    if (booking.status !== 'reserved') {
+      res.status(400).json({ success: false, msg: 'Booking is not reserved' });
+      return;
+    }
+
+    await Booking.updateOne({ _id: bookingId }, { status: 'checkedIn' });
+
+    res.status(200).json({
+      success: true,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+}
+
+export async function completeBooking(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user) {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    const bookingId = req.params.id;
+    const booking: IBooking | null = await Booking.findById(bookingId);
+    if (!booking) {
+      res.status(404).json({ success: false, msg: 'Not Found Booking' });
+      return;
+    }
+
+    if (req.user.role === 'user') {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    if (req.user.role === 'hotelManager') {
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+      if (booking.hotel.toString() !== req.user.hotel.toString()) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+    }
+
+    if (booking.status !== 'checkedIn') {
+      res.status(400).json({ success: false, msg: 'Booking is not checkedIn' });
+      return;
+    }
+
+    await Booking.updateOne({ _id: bookingId }, { status: 'completed' });
+
+    res.status(200).json({
+      success: true,
+    });
+  }
+  catch (err) {
     console.log(err);
     res.status(500).json({ success: false, msg: 'Server error' });
   }
