@@ -72,7 +72,7 @@ export async function getHotels(
     if (startIndex > 0) pagination.prev = { page: page - 1, limit };
     res
       .status(200)
-      .json({ success: true, pagination, data: hotels });
+      .json({ success: true, total,pagination, data: hotels });
   } catch (err:any) {
     if (err.message) {
       res.status(400).json({ success: false, msg: err.message });

@@ -65,3 +65,38 @@ export const authorize = (...roles: any[]) => {
     next();
   };
 };
+
+export const getRequestToken:RequestHandler = async(req:Request, res:Response, next: NextFunction) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    next();
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string,
+    ) as JwtPayload;
+    if (!decoded) {
+      throw new Error('Token is not valid');
+    }
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    req.user = user as unknown as IUser;
+    next();
+  } catch (err) {
+    next();
+    return;
+  }
+}
