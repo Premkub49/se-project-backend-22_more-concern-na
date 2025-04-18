@@ -4,6 +4,7 @@ export interface IReview {
   booking?: ObjectId;
   rating?: number;
   reply?: ObjectId;
+  parentReiewId?: ObjectId;
   title?: string;
   text?: string;
   createdAt: Date;
@@ -26,6 +27,10 @@ const ReviewSchema = new mongoose.Schema({
     },
   },
   reply: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Review',
+  },
+  parentReiewId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Review',
   },

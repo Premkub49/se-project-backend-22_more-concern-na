@@ -24,7 +24,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          return;
       }
 
-      const respondExists = await Review.findOne({ reply: req.params.reviewId });
+      const respondExists = await Review.findOne({ parentReviewId: req.params.reviewId });
       if(respondExists) {
          res.status(400).json({ success: false, msg: "Respond already exists" });
          return;
@@ -38,14 +38,15 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          res.status(403).json({ success: false, msg: "Not authorized to access this route" });
          return;
       }
-
+      const reviewId = new mongoose.Types.ObjectId(req.params.reviewId);
       const respond = {
-         reply: new mongoose.Types.ObjectId(req.params.reviewId),
+         parentReviewId: reviewId,
          title: req.body.title as string,
          text: req.body.text as string,
       }
 
-      await Review.create(respond);
+      const reply = await Review.create(respond);
+      await Review.updateOne({_id: reviewId},{$set: {reply: reply._id}});
       res.status(201).json({ success: true });
    } catch (error: any) {
       console.error(error.stack);
@@ -70,8 +71,8 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
          path: 'booking',
          select: 'hotel'
       }
-      console.log(respond.reply);
-      const review: any = await Review.findById(respond.reply).populate(populateBooking);
+      console.log(respond.parentReiewId);
+      const review: any = await Review.findById(respond.parentReviewId).populate(populateBooking);
       if(!review) {
          res.status(404).json({ success: false, msg: "Review not found" });
          return;
