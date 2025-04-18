@@ -218,7 +218,7 @@ export async function getBookings(
     const past: { pagination?: pagination, data?: IBooking[] } = {};
     const active: { pagination?: pagination, data?: IBooking[] } = {};
     const upcoming: { pagination?: pagination, data?: IBooking[] } = {};
-
+    let sumTotal = 0;
     for (const { query, data, page, pageSize } of [
       { query: queryPast, data: past, page: pastPage, pageSize: pastPageSize },
       { query: queryActive, data: active, page: activePage, pageSize: activePageSize },
@@ -227,7 +227,7 @@ export async function getBookings(
       const startIndex = (page - 1) * pageSize;
       const endIndex = page * pageSize;
       const total = await query.clone().countDocuments();
-      
+      sumTotal += total;
       if (!data.pagination) {
         data.pagination = {};
       }
@@ -249,10 +249,9 @@ export async function getBookings(
         .sort({ createdAt: -1 })
       data.pagination.count = data.data?.length || 0;
     }
-    const total = await Booking.countDocuments();
     res.status(200).json({
       success: true,
-      total,
+      total : sumTotal,
       past: past,
       active: active,
       upcoming: upcoming,
