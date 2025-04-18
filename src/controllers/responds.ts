@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import Review from "../models/Review";
 import mongoose from "mongoose";
+import responseErrorMsg from "./libs/responseMsg";
 
 export async function addRespond( req: Request, res: Response, next: NextFunction) {
    try {
@@ -24,8 +25,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          return;
       }
 
-      const respondExists = await Review.findOne({ parentReviewId: req.params.reviewId });
-      if(respondExists) {
+      if(review.reply) {
          res.status(400).json({ success: false, msg: "Respond already exists" });
          return;
       }
@@ -40,17 +40,16 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
       }
       const reviewId = new mongoose.Types.ObjectId(req.params.reviewId);
       const respond = {
-         parentReviewId: reviewId,
          title: req.body.title as string,
          text: req.body.text as string,
       }
 
-      const reply = await Review.create(respond);
-      await Review.updateOne({_id: reviewId},{$set: {reply: reply._id}});
+      await Review.updateOne({_id: reviewId},{$set: {reply: respond}});
       res.status(201).json({ success: true });
-   } catch (error: any) {
-      console.error(error.stack);
-      res.status(500).json({ success: false, msg: "Server Error" });
+   } catch (err: any) {
+      console.error(err.stack);
+      //res.status(500).json({ success: false, msg: "Server Error" });
+      responseErrorMsg(res,500,err,'Server error');
    }
 }
 
@@ -101,8 +100,9 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
 
       await respond.save();
       res.status(200).json({ success: true });
-   } catch (error: any) {
-      console.error(error.stack);
-      res.status(500).json({ success: false, msg: "Server Error" });
+   } catch (err: any) {
+      console.error(err.stack);
+      //res.status(500).json({ success: false, msg: "Server Error" });
+      responseErrorMsg(res,500,err,'Server error');
    }
 }

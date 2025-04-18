@@ -1,51 +1,25 @@
 import { NextFunction, Request, Response } from 'express';
 import Report, {IReport} from '../models/Report';
+import responseErrorMsg from './libs/responseMsg';
 
-function noSQLInjection(data:object | string) {
-  let dataStr = JSON.stringify(data);
-    dataStr = dataStr.replace(
-      /\b(gt|gte|lt|lte|in)\b/g,
-      (match) => `$${match}`,
-    );
-  const dataJSON = JSON.parse(dataStr);
-  return dataJSON;
-}
 
 export async function getReports(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  //TODO-reportReason, hotel, populateReview
   try {
-      let query;
-      const reqQuery = {...req.query};
-      const removeFields = ["select", "sort", "page", "limit"];
-      removeFields.forEach((param)=> delete reqQuery[param]);
-      const filters = await noSQLInjection(reqQuery);
-  
-      query = Report.find(filters);
-  
-      // projection
-      if (typeof req.query.select === "string") {
-        const fields = req.query.select.split(",").join(" ");
-        query = query.select(fields);
-      }
-  
-      // sort
-      if (typeof req.query.sort === "string") {
-        const sortBy = req.query.sort.split(",").join(" ");
-        query = query.sort(sortBy);
-      } else {
-        query = query.sort("-reportDate");
-      }
-    const reports = await query;
+    const reports = await Report.find();
+
     res.status(200).json({
       success: true,
       reports: reports,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -84,9 +58,10 @@ export async function updateReport(
     );
 
     res.status(200).json({ success: true });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: "Server Error" });
+    //res.status(500).json({ success: false, msg: "Server Error" });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -105,7 +80,8 @@ export async function addReport(
     if (err.message) {
       res.status(400).json({ success: false, msg: err.message });
     } else {
-      res.status(500).json({ success: false, msg: "Server Error" });
+      //res.status(500).json({ success: false, msg: "Server Error" });
+      responseErrorMsg(res,500,err,'Server error');
     }
   }
 }

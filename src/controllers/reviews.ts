@@ -3,11 +3,11 @@ import mongoose from 'mongoose';
 import Booking, { IBooking } from '../models/Booking';
 import Hotel from '../models/Hotel';
 import Review, { IReview } from '../models/Review';
+import responseErrorMsg from './libs/responseMsg';
 
 export async function getReview(
   req: Request,
   res: Response,
-  next: NextFunction,
 ) {
   try {
     if (!req.user) {
@@ -19,7 +19,6 @@ export async function getReview(
 
     const reviewId = req.params.reviewId;
     const review: IReview | null = (await Review.findById(reviewId)
-      .populate('reply')
       .populate('booking') 
       .populate({
       path: 'booking',
@@ -60,16 +59,16 @@ export async function getReview(
     }
 
     res.status(200).json({ success: true, data: review });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
 export async function addReview(
   req: Request,
   res: Response,
-  next: NextFunction,
 ) {
   try {
     if (!req.user) {
@@ -107,7 +106,7 @@ export async function addReview(
 
     const reviewExists = await Review.findOne({ booking: bookingId });
     if (reviewExists) {
-      res.status(400).json({ success: false, msg: 'Review already exists' });
+      res.status(400).json({ success: false, msg: 'Review associated with this booking is already exist' });
       return;
     }
 
@@ -151,16 +150,16 @@ export async function addReview(
 
     await Promise.all([Review.create(review), hotel.save()]);
     res.status(201).json({ success: true });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
 export async function updateReview(
   req: Request,
   res: Response,
-  next: NextFunction,
 ) {
   try {
     if (!req.user) {
@@ -241,18 +240,19 @@ export async function updateReview(
       hotel.save(),
     ]);
     res.status(200).json({ success: true });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
 export const getHotelReviews = async (
   req: Request,
   res: Response,
-  next: NextFunction,
 ) => {
   try {
+    //TODO-testGetHotelReviewsว่าpopulate reply ได้ไหม
     const bookings = await Booking.find({ hotel: req.params.hotelId })
       .select('_id user')
       .populate('user');
@@ -260,9 +260,6 @@ export const getHotelReviews = async (
     const yourBooking = bookings
      .filter((booking) => req.user && booking.user._id.toString() === req.user._id.toString())
      .map((booking) => booking._id);
-    console.log(req.user)
-    console.log('yourBooking', yourBooking);
-    console.log('bookingIds', bookingIds);
     
     // pagination
     const selfPage =
@@ -282,13 +279,6 @@ export const getHotelReviews = async (
      booking: { $in: bookingIds.filter((id) => yourBooking.includes(id)) },
    })
      .populate('booking')
-     .populate({
-      path: 'reply',
-      populate: {
-        path: '_id',
-        model: 'Review',
-      }
-    })
      .populate({
       path: 'booking',
       populate: {
@@ -317,13 +307,6 @@ export const getHotelReviews = async (
       booking: { $in: bookingIds.filter((id) => !yourBooking.includes(id)) },
     })
       .populate('booking')
-      .populate({
-        path: 'reply',
-        populate: {
-          path: '_id',
-          model: 'Review',
-        }
-      })
       .populate({
       path: 'booking',
       populate: {
@@ -362,16 +345,16 @@ export const getHotelReviews = async (
         self: { pagination: selfPagination, data: selfReview },
         other: { pagination: otherPagination, data: otherReview },
       });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 };
 
 export const deleteReview = async (
   req: Request,
   res: Response,
-  next: NextFunction,
 ) => {
   try {
     if (!req.user) {
@@ -408,8 +391,9 @@ export const deleteReview = async (
 
     await Review.deleteOne({ _id: reviewId });
     res.status(200).json({ success: true });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 };
