@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Booking, { IBooking } from '../models/Booking';
 import Hotel from '../models/Hotel';
 import Review, { IReview } from '../models/Review';
+import responseErrorMsg from './libs/responseMsg';
 
 export async function getReview(
   req: Request,
@@ -60,9 +61,10 @@ export async function getReview(
     }
 
     res.status(200).json({ success: true, data: review });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -151,9 +153,10 @@ export async function addReview(
 
     await Promise.all([Review.create(review), hotel.save()]);
     res.status(201).json({ success: true });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -241,9 +244,10 @@ export async function updateReview(
       hotel.save(),
     ]);
     res.status(200).json({ success: true });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -253,16 +257,14 @@ export const getHotelReviews = async (
   next: NextFunction,
 ) => {
   try {
+    //TODO-testGetHotelReviewsว่าpopulate reply ได้ไหม
     const bookings = await Booking.find({ hotel: req.params.hotelId })
       .select('_id user')
       .populate('user');
     const bookingIds = bookings.map((booking) => booking._id);
     const yourBooking = bookings
-     .filter((booking) => req.user && booking.user._id.toString() === req.user._id.toString())
-     .map((booking) => booking._id);
-    console.log(req.user)
-    console.log('yourBooking', yourBooking);
-    console.log('bookingIds', bookingIds);
+      .filter((booking) => req.user && booking.user._id.toString() === req.user._id.toString())
+      .map((booking) => booking._id);
     
     // pagination
     const selfPage =
@@ -362,9 +364,10 @@ export const getHotelReviews = async (
         self: { pagination: selfPagination, data: selfReview },
         other: { pagination: otherPagination, data: otherReview },
       });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 };
 
@@ -408,8 +411,9 @@ export const deleteReview = async (
 
     await Review.deleteOne({ _id: reviewId });
     res.status(200).json({ success: true });
-  } catch (error: any) {
-    console.error(error.stack);
-    res.status(500).json({ success: false, msg: 'Server Error' });
+  } catch (err: any) {
+    console.error(err.stack);
+    //res.status(500).json({ success: false, msg: 'Server Error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 };

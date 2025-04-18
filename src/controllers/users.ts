@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import User, { IUser } from '../models/User';
 import mongoose from "mongoose";
 import sendTokenResponse from './auth';
+import responseErrorMsg from './libs/responseMsg';
 export async function getUsers(
   req: Request,
   res: Response,
@@ -15,9 +16,10 @@ export async function getUsers(
       total,
       users: users,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -46,7 +48,8 @@ export async function updateUser(req: Request, res:Response, next: NextFunction)
     sendTokenResponse(newUser, 200, res);
   }catch(err: any){
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -63,6 +66,7 @@ export async function updateRole(req: Request, res: Response, next: NextFunction
     res.status(200).json({success: true})
   }catch(err:any){
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }

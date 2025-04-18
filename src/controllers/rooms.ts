@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Hotel, { Rooms } from "../models/Hotel";
+import responseErrorMsg from "./libs/responseMsg";
 
 function roomCheckHotel(req:Request, res:Response):boolean {
     if(!req.user){
@@ -31,7 +32,8 @@ export async function addRoom(req:Request, res:Response, next:NextFunction) {
         res.status(201).json({success: true});
     }catch(err:any){
         console.log(err.stack);
-        res.status(500).json({success: false, msg:"Server Error"})
+        //res.status(500).json({success: false, msg:"Server Error"})
+        responseErrorMsg(res,500,err,'Server error');
     }
     
 }
@@ -63,7 +65,8 @@ export async function updateRoom(req:Request, res:Response, next:NextFunction){
         res.status(200).json({success: true});
     }catch(err:any){
         console.log(err);
-        res.status(500).json({success: false, msg: "Server Error"});
+        //res.status(500).json({success: false, msg: "Server Error"});
+        responseErrorMsg(res,500,err,'Server error');
     }
 }
 
@@ -89,6 +92,7 @@ export async function deleteRoom(req: Request, res: Response, next: NextFunction
         res.status(200).json({success: true});
     }catch(err:any){
         console.log(err);
-        res.status(500).json({success: false, msg: "Server Error"});
+        //res.status(500).json({success: false, msg: "Server Error"});
+        responseErrorMsg(res,500,err,'Server error');
     }
 }

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import User, { IUser } from '../models/User';
 import Booking from '../models/Booking';
-import responseMsg from './libs/responseMsg';
+import responseErrorMsg from './libs/responseMsg';
 
 interface IOption {
   expires?: Date;
@@ -64,7 +64,7 @@ export const register = async (
   } catch (err: any) {
     const message = errMongoChecker(err);
     //res.status(400).json({ success: false, msg: message });
-    responseMsg(res,400,err,message);
+    responseErrorMsg(res,400,err,message);
     console.log(err.stack);
   }
 };
@@ -173,7 +173,7 @@ export const getMe = async (
   }catch(err: any){
     console.log(err);
     //res.status(500).json({success: false, msg: "Server Error"})
-    responseMsg(res,500,err,"Server Error");
+    responseErrorMsg(res,500,err,"Server Error");
   }
 };
 

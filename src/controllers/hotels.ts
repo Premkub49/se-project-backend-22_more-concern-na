@@ -3,6 +3,7 @@ import Hotel, { IHotel } from '../models/Hotel';
 import Booking from '../models/Booking';
 import mongoose from 'mongoose';
 import User from '../models/User';
+import responseErrorMsg from './libs/responseMsg';
 
 function noSQLInjection(data:object | string) {
   let dataStr = JSON.stringify(data);
@@ -77,7 +78,8 @@ export async function getHotels(
     if (err.message) {
       res.status(400).json({ success: false, msg: err.message });
     } else {
-      res.status(500).json({ success: false, msg: "Server Error" });
+      //res.status(500).json({ success: false, msg: "Server Error" });
+      responseErrorMsg(res,500,err,'Server error');
     }
   }
 }
@@ -98,9 +100,10 @@ export async function getHotel(
       success: true,
       hotel: hotel,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server Error"});
+    //res.status(500).json({success:false, msg:"Server Error"});
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -117,7 +120,8 @@ export async function addHotel(
     if (err.message) {
       res.status(400).json({ success: false, msg: err.message });
     } else {
-      res.status(500).json({ success: false, msg: "Server Error" });
+      //res.status(500).json({ success: false, msg: "Server Error" });
+      responseErrorMsg(res,500,err,'Server error');
     }
   }
 }
@@ -143,9 +147,10 @@ export async function updateHotel(
     }
     await Hotel.updateOne({ _id: req.params.hotelId }, reqBody);
     res.status(200).json({ success: true });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server Error"});
+    //res.status(500).json({success:false, msg:"Server Error"});
+  responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -161,9 +166,10 @@ export async function deleteHotel(
       { $unset: { hotel: "" } }
     );
     res.status(200).json({ success: true });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({success:false, msg:"Server Error"});
+    //res.status(500).json({success:false, msg:"Server Error"});
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -215,6 +221,7 @@ export async function checkAvailable(req:Request, res:Response, next: NextFuncti
     res.status(200).json({success:true, rooms:returnRooms});
   }catch(err:any){
     console.log(err);
-    res.status(500).json({success:false, msg:"Server Error"});
+    //res.status(500).json({success:false, msg:"Server Error"});
+    responseErrorMsg(res,500,err,'Server error');
   }
 }

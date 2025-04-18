@@ -1,7 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, response, Response } from 'express';
 
 import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
 import Hotel, { IHotel, Rooms } from '../models/Hotel';
+import responseErrorMsg from './libs/responseMsg';
 
 interface pagination {
   next?: { page: number; limit: number; };
@@ -256,9 +257,10 @@ export async function getBookings(
       active: active,
       upcoming: upcoming,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -319,9 +321,10 @@ export async function getBooking(
       success: true,
       booking: booking,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -391,9 +394,10 @@ export async function addBooking(
     res.status(201).json({
       success: true,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -468,9 +472,10 @@ export async function updateBooking(
     res.status(200).json({
       success: true,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -514,9 +519,10 @@ export async function deleteBooking(
     res.status(200).json({
       success: true,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -572,9 +578,10 @@ export async function checkInBooking(
     res.status(200).json({
       success: true,
     });
-  } catch (err) {
+  } catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
 
@@ -631,8 +638,9 @@ export async function completeBooking(
       success: true,
     });
   }
-  catch (err) {
+  catch (err:any) {
     console.log(err);
-    res.status(500).json({ success: false, msg: 'Server error' });
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
   }
 }
