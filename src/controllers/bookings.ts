@@ -249,9 +249,10 @@ export async function getBookings(
         .sort({ createdAt: -1 })
       data.pagination.count = data.data?.length || 0;
     }
-
+    const total = await Booking.countDocuments();
     res.status(200).json({
       success: true,
+      total,
       past: past,
       active: active,
       upcoming: upcoming,
