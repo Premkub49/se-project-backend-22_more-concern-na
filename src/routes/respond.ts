@@ -4,8 +4,6 @@ import { addRespond, updateRespond } from '../controllers/responds';
 
 const router = express.Router({ mergeParams: true });
 
-router.route('/').post(protect, addRespond);
-
-router.route('/:respondId').put(protect, updateRespond);
+router.route('/').post(protect, addRespond).put(protect, updateRespond);
 
 export default router;
