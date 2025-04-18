@@ -25,8 +25,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          return;
       }
 
-      const respondExists = await Review.findOne({ parentReviewId: req.params.reviewId });
-      if(respondExists) {
+      if(review.reply) {
          res.status(400).json({ success: false, msg: "Respond already exists" });
          return;
       }
@@ -41,13 +40,11 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
       }
       const reviewId = new mongoose.Types.ObjectId(req.params.reviewId);
       const respond = {
-         parentReviewId: reviewId,
          title: req.body.title as string,
          text: req.body.text as string,
       }
 
-      const reply = await Review.create(respond);
-      await Review.updateOne({_id: reviewId},{$set: {reply: reply._id}});
+      await Review.updateOne({_id: reviewId},{$set: {reply: respond}});
       res.status(201).json({ success: true });
    } catch (err: any) {
       console.error(err.stack);

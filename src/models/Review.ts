@@ -1,10 +1,14 @@
 import mongoose, { ObjectId } from 'mongoose';
+
+export interface IReply {
+  text?: string;
+  title?: string;
+}
 export interface IReview {
   _id: ObjectId;
   booking?: ObjectId;
   rating?: number;
-  reply?: ObjectId;
-  parentReiewId?: ObjectId;
+  reply?: IReply;
   title?: string;
   text?: string;
   createdAt: Date;
@@ -27,12 +31,10 @@ const ReviewSchema = new mongoose.Schema({
     },
   },
   reply: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Review',
-  },
-  parentReiewId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Review',
+    type: {
+      text: { type: String },
+      title: { type: String },
+    },
   },
   title: {
     type: String,
@@ -50,7 +52,6 @@ ReviewSchema.post("deleteOne", async function (doc, next){
   try{
     if(doc){
       await mongoose.model('Report').deleteMany({review: doc._id});
-      await mongoose.model('Review').deleteMany({reply: doc._id});
     }
     next();
   }catch(err:any){
