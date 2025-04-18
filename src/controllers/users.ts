@@ -9,8 +9,10 @@ export async function getUsers(
 ) {
   try {
     const users = await User.find();
+    const total = await User.countDocuments();
     res.status(200).json({
       success: true,
+      total,
       users: users,
     });
   } catch (err) {
