@@ -282,7 +282,13 @@ export const getHotelReviews = async (
      booking: { $in: bookingIds.filter((id) => yourBooking.includes(id)) },
    })
      .populate('booking')
-     .populate('reply')
+     .populate({
+      path: 'reply',
+      populate: {
+        path: '_id',
+        model: 'Review',
+      }
+    })
      .populate({
       path: 'booking',
       populate: {
@@ -311,7 +317,13 @@ export const getHotelReviews = async (
       booking: { $in: bookingIds.filter((id) => !yourBooking.includes(id)) },
     })
       .populate('booking')
-      .populate('reply')
+      .populate({
+        path: 'reply',
+        populate: {
+          path: '_id',
+          model: 'Review',
+        }
+      })
       .populate({
       path: 'booking',
       populate: {
