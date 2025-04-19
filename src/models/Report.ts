@@ -1,4 +1,13 @@
 import mongoose, { ObjectId } from 'mongoose';
+export const reportReasons = [ 
+  'pedo',
+  'bully',
+  'suicide',
+  'violence',
+  'nsfw',
+  'spam',
+  'scam',
+  'other'];
 export interface IReport {
   _id: ObjectId;
   review: ObjectId;
