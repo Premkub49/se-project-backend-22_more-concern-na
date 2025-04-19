@@ -21,14 +21,34 @@ export async function getReports(
           model: 'Booking'
         }
       })
+      .populate({
+        path: 'review',
+        populate: {
+          path: 'booking',
+          populate: {
+            path: 'user',
+            model: 'User'
+          }
+        }
+      })
+      .populate({
+        path: 'review',
+        populate: {
+          path: 'booking',
+          populate: {
+            path: 'hotel',
+            model: 'Hotel'
+          }
+        }
+      })
       if(report.length !== 0){
-        let hotelIds = new Set();
+        let hotelNames = new Set();
         for(const r of report){
-          hotelIds.add(r.review.booking.hotel);
+          hotelNames.add(r.review.booking.hotel.name);
         }
         let data = {};
-        for(const hotel of hotelIds){
-          const d = report.filter((r:any)=> r.review.booking.hotel === hotel);
+        for(const hotel of hotelNames){
+          const d = report.filter((r:any)=> r.review.booking.hotel.name === hotel);
           data = {hotel: hotel, report: d};
         }
         reports.push({reportReason: reason, data: data});
