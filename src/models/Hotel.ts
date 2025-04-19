@@ -37,10 +37,10 @@ const HotelSchema = new mongoose.Schema(
     },
     picture: {
       type: String,
-      match: [
+      /*match: [
         /^https?:\/\/.*\.(?:png|jpg|jpeg|gif)$/i,
         'Please provide a valid URL',
-      ],
+      ],*/
     },
     buildingNumber: {
       type: String,

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import Report, {IReport} from '../models/Report';
+import Report, {IReport, reportReasons} from '../models/Report';
 import responseErrorMsg from './libs/responseMsg';
 
 
@@ -10,8 +10,30 @@ export async function getReports(
 ) {
   //TODO-reportReason, hotel, populateReview
   try {
-    const reports = await Report.find();
-
+    const reports = [];
+    for(const reason of reportReasons){
+      let report:any = await Report.find({reportReason:reason})
+      .populate('review')
+      .populate({
+        path: 'review',
+        populate: {
+          path: 'booking',
+          model: 'Booking'
+        }
+      })
+      if(report.length !== 0){
+        let hotelIds = new Set();
+        for(const r of report){
+          hotelIds.add(r.review.booking.hotel);
+        }
+        let data = {};
+        for(const hotel of hotelIds){
+          const d = report.filter((r:any)=> r.review.booking.hotel === hotel);
+          data = {hotel: hotel, report: d};
+        }
+        reports.push({reportReason: reason, data: data});
+      }
+    }
     res.status(200).json({
       success: true,
       reports: reports,
