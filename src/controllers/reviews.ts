@@ -49,7 +49,7 @@ export async function getReview(
 
     if (
       req.user.role !== 'admin' &&
-      (req.user.role !== 'hotelManager' || req.user.hotel !== booking.hotel) &&
+      (req.user.role !== 'hotelManager') &&
       booking.user.toString() !== req.user._id.toString()
     ) {
       res
@@ -58,10 +58,23 @@ export async function getReview(
       return;
     }
 
+    if (req.user.role === 'hotelManager') {
+      const hotel = await Hotel.findById(req.user.hotel);
+      if (!hotel) {
+        res.status(404).json({ success: false, msg: 'Hotel not found' });
+        return;
+      }
+      if (hotel._id.toString() !== booking.hotel.toString()) {
+        res
+          .status(403)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+    }
+
     res.status(200).json({ success: true, data: review });
   } catch (err: any) {
     console.error(err.stack);
-    //res.status(500).json({ success: false, msg: 'Server Error' });
     responseErrorMsg(res,500,err,'Server error');
   }
 }
