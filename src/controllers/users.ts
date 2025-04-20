@@ -39,10 +39,10 @@ export async function updateUser(req: Request, res:Response, next: NextFunction)
       .json({ success: false, msg: 'Not authorized to access this route' });
     return;
     }
-    user.name = name;
-    user.picture = picture;
-    user.tel = tel;
-    user.password = password;
+    if(name) user.name = name;
+    if(picture) user.picture = picture;
+    if(tel) user.tel = tel;
+    if(password) user.password = password;
     await user.save();
     const newUser = await User.findById(req.user._id) as any as IUser;
     sendTokenResponse(newUser, 200, res);
