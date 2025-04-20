@@ -424,12 +424,28 @@ export async function updateBooking(
 
     if (
       req.user.role !== 'admin' &&
+      req.user.role !== 'hotelManager' &&
       booking.user.toString() !== req.user._id.toString()
     ) {
       res
         .status(401)
         .json({ success: false, msg: 'Not authorized to access this route' });
       return;
+    }
+
+    if (req.user.role === 'hotelManager') {
+      if (!req.user.hotel) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
+      if (booking.hotel.toString() !== req.user.hotel.toString()) {
+        res
+          .status(401)
+          .json({ success: false, msg: 'Not authorized to access this route' });
+        return;
+      }
     }
 
     const hotel: IHotel | null = await Hotel.findById(booking.hotel);
@@ -440,7 +456,7 @@ export async function updateBooking(
 
     const newBooking: IBooking = req.body;
 
-    if(req.user.role !== 'admin') {
+    if(req.user.role !== 'admin' && req.user.role !== 'hotelManager') {
       newBooking.status = booking.status;
     }
 
