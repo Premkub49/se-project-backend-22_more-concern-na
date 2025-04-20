@@ -46,10 +46,10 @@ export async function getReports(
         for(const r of report){
           hotelNames.add(r.review.booking.hotel.name);
         }
-        let data = {};
+        let data = [];
         for(const hotel of hotelNames){
           const d = report.filter((r:any)=> r.review.booking.hotel.name === hotel);
-          data = {hotel: hotel, report: d};
+          data.push({hotel: hotel, report: d});
         }
         reports.push({reportReason: reason, data: data});
       }
