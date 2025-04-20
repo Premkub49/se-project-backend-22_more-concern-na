@@ -48,11 +48,9 @@ const ReviewSchema = new mongoose.Schema({
   },
 });
 
-ReviewSchema.post("deleteOne", async function (doc, next){
+ReviewSchema.pre("deleteOne", async function (next){
   try{
-    if(doc){
-      await mongoose.model('Report').deleteMany({review: doc._id});
-    }
+    await mongoose.model('Report').deleteMany({review: this._id});
     next();
   }catch(err:any){
     console.log(err);
