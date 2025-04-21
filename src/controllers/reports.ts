@@ -11,6 +11,7 @@ export async function getReports(
   //TODO-reportReason, hotel, populateReview
   try {
     const reports = [];
+    const responseCount = await Report.countDocuments({});
     for(const reason of reportReasons){
       let report:any = await Report.find({reportReason:reason})
       .populate('review')
@@ -57,6 +58,7 @@ export async function getReports(
     res.status(200).json({
       success: true,
       reports: reports,
+      count: responseCount
     });
   } catch (err:any) {
     console.log(err);
