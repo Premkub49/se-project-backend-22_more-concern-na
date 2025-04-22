@@ -78,6 +78,7 @@ const UserSchema = new mongoose.Schema({
       {
         redeemableId: {
           type: mongoose.Schema.Types.ObjectId,
+          ref: 'Redeemable',
         },
         count: {
           type: Number,
