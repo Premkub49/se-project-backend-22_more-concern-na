@@ -114,3 +114,49 @@ export async function getInventoryByType(type: string, req: Request, res: Respon
     responseErrorMsg(res, 500, err, "Server error");
   }
 }
+
+export async function useRedeemableInInventory(req: Request, res: Response, next: NextFunction) {
+  try {
+    if(!req.user) {
+      res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+      return;
+    }
+
+    const redeemableId = req.params.redeemableId;
+
+    if (!redeemableId) {
+      res.status(400).json({ success: false, msg: "Please provide redeemableId" });
+      return;
+    }
+
+    const redeemable = await Redeemable.findById(redeemableId);
+    if (!redeemable) {
+      res.status(404).json({ success: false, msg: "Redeemable not found" });
+      return;
+    }
+    
+    const user: any = await User.findById(req.user._id);
+
+    const index = user.inventory.findIndex((item: any) => {
+      return item.redeemableId.toString() === redeemableId;
+    })
+
+    if (index === -1) {
+      res.status(404).json({ success: false, msg: "Item not found in inventory" });
+      return;
+    }
+
+    user.inventory[index].count -= 1;
+    if (user.inventory[index].count <= 0) {
+      user.inventory.splice(index, 1);
+    }
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: user.inventory
+    })
+  } catch (error: any) {
+    responseErrorMsg(res, 500, error, "Server error");
+  }
+}
