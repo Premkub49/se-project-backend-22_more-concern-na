@@ -3,11 +3,6 @@ import User from "../models/User";
 import responseErrorMsg from "./libs/responseMsg";
 import Redeemable from "../models/Redeemable";
 
-export async function mock() {
-   const redeemable = await Redeemable.find();
-   console.log(redeemable);
-}
-
 interface pagination {
   next?: { page: number; limit: number; };
   prev?: { page: number; limit: number; };
