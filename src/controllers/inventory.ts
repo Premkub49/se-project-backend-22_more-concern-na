@@ -77,9 +77,10 @@ export async function getInventoryByType(type: string, req: Request, res: Respon
 
     if (endIndex < total) {
       if(page == totalPage - 1) {
+        const nextLimit = total % pageSize === 0 ? pageSize : total % pageSize;
         pagination.next = {
           page: page + 1,
-          limit: total % pageSize
+          limit: nextLimit
         }
       }
       else {
