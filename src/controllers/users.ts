@@ -70,3 +70,46 @@ export async function updateRole(req: Request, res: Response, next: NextFunction
     responseErrorMsg(res,500,err,'Server error');
   }
 }
+
+export async function updateUserPoint(req: Request, res:Response, next: NextFunction){
+  //console.log("test");
+  try{
+    if (!req.user||req.user.role!="admin") {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(req.body, "point") || Object.keys(req.body).length !== 1) {
+      res.status(400).json({ success: false, msg: "Only 'point' field can be updated" });
+      return;
+    }
+    const point = req.body.point;
+    if(point === null){
+      res.status(400).json({ success: false, msg: "point can not be null" });
+      return;
+    }
+    if(point < 0){
+      res.status(400).json({ success: false, msg: "point can not be less than 0" });
+      return;
+    }
+    const user = await User.findById(req.params.userId);
+    if(!user){
+      res
+      .status(404)
+      .json({ success: false, msg: 'user not found' });
+    return;
+    }
+    
+    await User.updateOne(
+          { _id: req.params.userId },
+          { $set: { point } }
+        );
+        res.status(200).json({ success: true , point:point});
+  }catch(err: any){
+    console.log(err);
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
+  }
+}
