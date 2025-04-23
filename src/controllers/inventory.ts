@@ -60,6 +60,7 @@ export async function getInventoryByType(type: string, req: Request, res: Respon
             description: '$redeemable.description',
             expire: '$redeemable.expire',
             point: '$redeemable.point',
+            picture: '$redeemable.picture',
             _id: 0
           }
         }
