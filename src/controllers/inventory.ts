@@ -54,13 +54,12 @@ export async function getInventoryByType(type: string, req: Request, res: Respon
         {
           $project: {
             id: '$inventory.redeemableId',
-            remain: '$inventory.remain',
             count: '$inventory.count',
             name: '$redeemable.name',
             type: '$redeemable.type',
             description: '$redeemable.description',
             expire: '$redeemable.expire',
-            point: '$redeemable.pointUse',
+            point: '$redeemable.point',
             _id: 0
           }
         }
