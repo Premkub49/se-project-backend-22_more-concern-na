@@ -105,7 +105,7 @@ export async function getInventoryByType(type: string, req: Request, res: Respon
 
     res.status(200).json({
       success: true,
-      count: total,
+      total: total,
       pagination: pagination,
       data: coupons
     })
