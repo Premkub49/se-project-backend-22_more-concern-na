@@ -94,7 +94,7 @@ export async function updateUserPoint(req: Request, res:Response, next: NextFunc
       res.status(400).json({ success: false, msg: "point can not be less than 0" });
       return;
     }
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.userId);
     if(!user){
       res
       .status(404)
@@ -103,7 +103,7 @@ export async function updateUserPoint(req: Request, res:Response, next: NextFunc
     }
     
     await User.updateOne(
-          { _id: req.params.id },
+          { _id: req.params.userId },
           { $set: { point } }
         );
         res.status(200).json({ success: true , point:point});
