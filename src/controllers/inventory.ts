@@ -98,7 +98,7 @@ export async function getInventoryByType(type: string, req: Request, res: Respon
 
     const coupons = await User.aggregate(aggregate).skip(startIndex).limit(pageSize);
 
-    if (!coupons) {
+    if (coupons.length === 0) {
       res.status(404).json({ success: false, msg: "No coupons found" });
       return;
     }
