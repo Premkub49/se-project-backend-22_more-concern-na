@@ -9,7 +9,7 @@ interface pagination {
   count?: number;
 }
 
-export async function getInventoryByType(type: string, req: Request, res: Response, next: NextFunction) {
+export async function getCouponsInInventory(req: Request, res: Response, next: NextFunction) {
   try {
     if(!req.user) {
       res.status(401).json({ success: false, msg: "Not authorized to access this route" });
@@ -50,18 +50,119 @@ export async function getInventoryByType(type: string, req: Request, res: Respon
         },
         { $project: { redeemable: 1, inventory: 1 } },
         { $unwind: { path: '$redeemable' } },
-        { $match: { 'redeemable.type': type } },
+        { $match: { 'redeemable.type': 'coupon' } },
         {
           $project: {
             id: '$inventory.redeemableId',
-            count: '$inventory.count',
             name: '$redeemable.name',
-            type: '$redeemable.type',
-            description: '$redeemable.description',
+            point: '$redeemable.point',
+            discount: '$redeemable.discount',
             expire: '$redeemable.expire',
+            count: '$inventory.count',
+            _id: 0
+          }
+        }
+    ];
+
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const pagination: pagination = {}
+    const total = (await User.aggregate(aggregate).count("total"))[0].total;
+    const totalPage = Math.ceil(total / pageSize);
+
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = page * pageSize;
+
+    if (endIndex < total) {
+      if(page == totalPage - 1) {
+        const nextLimit = total % pageSize === 0 ? pageSize : total % pageSize;
+        pagination.next = {
+          page: page + 1,
+          limit: nextLimit
+        }
+      }
+      else {
+        pagination.next = {
+          page: page + 1,
+          limit: pageSize
+        }
+      }
+    }
+    if (startIndex > 0) {
+      pagination.prev = {
+        page: page - 1,
+        limit: pageSize
+      }
+    }
+
+    const coupons = await User.aggregate(aggregate).skip(startIndex).limit(pageSize);
+
+    if (coupons.length === 0) {
+      res.status(404).json({ success: false, msg: "No coupons found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      total: total,
+      pagination: pagination,
+      data: coupons
+    })
+  }
+  catch (err: any) {
+    responseErrorMsg(res, 500, err, "Server error");
+  }
+}
+
+export async function getGiftsInInventory(req: Request, res: Response, next: NextFunction) {
+  try {
+    if(!req.user) {
+      res.status(401).json({ success: false, msg: "Not authorized to access this route" });
+      return;
+    }
+    
+    const user = await User.findById(req.user._id).populate({
+      path: "inventory",
+      populate: {
+        path: "redeemableId",
+        model: "Redeemable"
+      }
+    })
+
+    if (!user) {
+      res.status(404).json({ success: false, msg: "User not found" });
+      return;
+    }
+    if (!user.inventory) {
+      res.status(404).json({ success: false, msg: "User has no items in inventory" });
+      return;
+    }
+
+    const aggregate = [
+        {
+          $match: {
+            _id: user._id
+          }
+        },
+        { $unwind: { path: '$inventory' } },
+        {
+          $lookup: {
+            from: 'redeemables',
+            localField: 'inventory.redeemableId',
+            foreignField: '_id',
+            as: 'redeemable'
+          }
+        },
+        { $project: { redeemable: 1, inventory: 1 } },
+        { $unwind: { path: '$redeemable' } },
+        { $match: { 'redeemable.type': 'gift' } },
+        {
+          $project: {
+            id: '$inventory.redeemableId',
+            name: '$redeemable.name',
+            description: '$redeemable.description',
             point: '$redeemable.point',
             picture: '$redeemable.picture',
-            discount: '$redeemable.discount',
             _id: 0
           }
         }
