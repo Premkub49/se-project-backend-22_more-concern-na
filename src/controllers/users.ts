@@ -90,6 +90,10 @@ export async function updateUserPoint(req: Request, res:Response, next: NextFunc
       res.status(400).json({ success: false, msg: "point can not be null" });
       return;
     }
+    if(point < 0){
+      res.status(400).json({ success: false, msg: "point can not be less than 0" });
+      return;
+    }
     const user = await User.findById(req.params.id);
     if(!user){
       res
@@ -102,7 +106,7 @@ export async function updateUserPoint(req: Request, res:Response, next: NextFunc
           { _id: req.params.id },
           { $set: { point } }
         );
-        res.status(200).json({ success: true });
+        res.status(200).json({ success: true , point:point});
   }catch(err: any){
     console.log(err);
     //res.status(500).json({ success: false, msg: 'Server error' });
