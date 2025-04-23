@@ -113,3 +113,49 @@ export async function updateUserPoint(req: Request, res:Response, next: NextFunc
     responseErrorMsg(res,500,err,'Server error');
   }
 }
+
+export async function getUsersPoints(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    // Get page and pageSize from request body, default to page 1 and pageSize 10
+    const { page = 1, pageSize = 10 } = req.body;
+
+    // Validate input
+    const parsedPage = Math.max(1, parseInt(page));
+    const parsedPageSize = Math.max(1, parseInt(pageSize));
+
+    const skip = (parsedPage - 1) * parsedPageSize;
+
+    // Get total count of documents
+    const total = await User.countDocuments();
+
+    // Get paginated users
+    const users = await User.find().select('id name email point')
+      .skip(skip)
+      .limit(parsedPageSize);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(total / parsedPageSize);
+
+    res.status(200).json({
+      success: true,
+      pagination: {
+        next:{
+          page: parsedPage+1,
+          limit: parsedPageSize
+        },
+        prev:{
+          page: parsedPage-1,
+          limit: parsedPageSize
+        }
+      },
+      data: users,
+    });
+  } catch (err: any) {
+    console.log(err);
+    responseErrorMsg(res, 500, err, 'Server error');
+  }
+}
