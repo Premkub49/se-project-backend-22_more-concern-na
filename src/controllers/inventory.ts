@@ -146,6 +146,11 @@ export async function useRedeemableInInventory(req: Request, res: Response, next
       return;
     }
 
+    if (redeemable.expire && redeemable.expire < new Date()) {
+      res.status(400).json({ success: false, msg: "Item has expired" });
+      return;
+    }
+
     user.inventory[index].count -= 1;
     if (user.inventory[index].count <= 0) {
       user.inventory.splice(index, 1);
