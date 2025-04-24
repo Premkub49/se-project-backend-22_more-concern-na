@@ -460,7 +460,7 @@ export async function addBooking(
 
       if (!coupon.discount) {
         // No way
-        console.log('Not coupon and no way to get this massage');
+        console.log('Not coupon and no way to get this message');
         res.status(400).json({ success: false, msg: 'Not a Coupon' });
         return;
       }
