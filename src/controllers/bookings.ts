@@ -451,7 +451,7 @@ export async function addBooking(
 
       if (!foundCoupon) {
         // No way
-        console.log('No coupon and no way to get this massage');
+        console.log('No coupon and no way to get this message');
         res.status(404).json({ success: false, msg: 'Not Found Coupon' });
         return;
       }
