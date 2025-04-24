@@ -458,7 +458,7 @@ export async function addBooking(
 
       coupon = foundCoupon;
 
-      if (!coupon.discount) {
+      if (coupon.discount == null) {
         // No way
         console.log('Not coupon and no way to get this message');
         res.status(400).json({ success: false, msg: 'Not a Coupon' });
