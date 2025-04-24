@@ -1,6 +1,6 @@
-import { addRedeemable, getCouponsInRedeemables, getGiftsInRedeemables } from "controllers/redeemables";
+import { addRedeemable, getCouponsInRedeemables, getGiftsInRedeemables } from "../controllers/redeemables";
 import express from "express";
-import { authorize, protect } from "middleware/auth";
+import { authorize, protect } from "../middleware/auth";
 
 const router = express.Router();
 
