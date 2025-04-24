@@ -3,6 +3,9 @@ import { NextFunction, Request, response, Response } from 'express';
 import Booking, { BookingType, IBooking, PBooking } from '../models/Booking';
 import Hotel, { IHotel, Rooms } from '../models/Hotel';
 import responseErrorMsg from './libs/responseMsg';
+import User, { IUser, UserRedeemable } from '../models/User';
+import Redeemable, { IRedeemable } from '../models/Redeemable';
+import { useRedeemableInInventory } from './inventory';
 
 interface pagination {
   next?: { page: number; limit: number; };
@@ -57,6 +60,52 @@ export function checkBookingValid(req: Request, res: Response) {
   }
 
   return true;
+}
+
+export async function checkValidCoupon(
+  couponId: string,
+  user: IUser | null,
+  res?: Response,
+  type: string = 'addBooking'
+): Promise<[boolean, IRedeemable | null]> {
+  if(!couponId) {
+    return [false, null];
+  }
+
+  if(!user) {
+    if (res)
+      res.status(401).json({ success: false, msg: 'Not authorized to access this route' });
+    return [false, null];
+  }
+
+  const coupon: IRedeemable | null = await Redeemable.findById(couponId);
+  const userCoupon = user.inventory.find((item) => item.redeemableId.toString() === couponId);
+
+  if (!coupon) {
+    if (res)
+      res.status(404).json({ success: false, msg: 'Not Found Coupon' });
+    return [false, null];
+  }
+
+  if (coupon.type !== 'coupon') {
+    if (res)
+      res.status(400).json({ success: false, msg: 'Not a Coupon' });
+    return [false, null];
+  }
+
+  if (!userCoupon) {
+    if (res)
+      res.status(404).json({ success: false, msg: 'Not Found Coupon in User Inventory' });
+    return [false, null];
+  }
+
+  if (type === 'addBooking' && coupon.expire && coupon.expire < new Date()) {
+    if (res)
+      res.status(400).json({ success: false, msg: 'Coupon has expired' });
+    return [false, null];
+  }
+
+  return [true, coupon];
 }
 
 export async function checkRoomsValidAndCalculatePrice(
@@ -375,7 +424,7 @@ export async function addBooking(
       return;
     }
 
-    const { valid, price: calculatedPrice } =
+    let { valid, price: calculatedPrice } =
       await checkRoomsValidAndCalculatePrice(
         booking,
         hotel,
@@ -386,13 +435,58 @@ export async function addBooking(
       return;
     }
 
-    booking.price = calculatedPrice;
+    let coupon: IRedeemable | null = null;
+    const data: { price?: number; couponUsed?: boolean; discount?: number } = {};
+
+    if (req.body.couponId) {
+      const [valid, foundCoupon] = await checkValidCoupon(
+        req.body.couponId,
+        req.user,
+        res,
+      );
+
+      if (!valid) {
+        return;
+      }
+
+      if (!foundCoupon) {
+        // No way
+        console.log('No coupon and no way to get this message');
+        res.status(404).json({ success: false, msg: 'Not Found Coupon' });
+        return;
+      }
+
+      coupon = foundCoupon;
+
+      if (coupon.discount == null) {
+        // No way
+        console.log('Not coupon and no way to get this message');
+        res.status(400).json({ success: false, msg: 'Not a Coupon' });
+        return;
+      }
+
+      const temp = calculatedPrice;
+      calculatedPrice = temp - temp * coupon.discount;
+      data.couponUsed = true;
+      data.discount = temp - calculatedPrice;
+
+      booking.coupon = coupon._id;
+    }
+
+    booking.price = data.price = calculatedPrice;
     booking.status = 'reserved';
 
     await Booking.create(booking);
+    
+    if (coupon) {
+      req.params.redeemableId = coupon._id.toString();
+      req.params.noResponse = 'true';
+      await useRedeemableInInventory(req, res, next);
+    }
 
     res.status(201).json({
       success: true,
+      ...data
     });
   } catch (err:any) {
     console.log(err);
@@ -469,7 +563,7 @@ export async function updateBooking(
     )
       return;
 
-    const { valid, price: calculatedPrice } =
+    let { valid, price: calculatedPrice } =
       await checkRoomsValidAndCalculatePrice(
         newBooking,
         hotel,
@@ -481,12 +575,40 @@ export async function updateBooking(
       return;
     }
 
-    newBooking.price = calculatedPrice;
+    let coupon: IRedeemable | null = null;
+    const data: { price?: number; couponUsed?: boolean; discount?: number } = {};
+
+    console.log(booking);
+
+    if (booking.coupon) {
+      coupon = await Redeemable.findById(booking.coupon);
+
+      if (!coupon) {
+        res.status(404).json({ success: false, msg: 'Not Found Coupon' });
+        return;
+      }
+
+      if (coupon.discount == null) {
+        res.status(400).json({ success: false, msg: 'Not a Coupon' });
+        return;
+      }
+
+      const temp = calculatedPrice;
+      calculatedPrice = temp - temp * coupon.discount;
+      data.couponUsed = true;
+      data.discount = temp - calculatedPrice;
+
+      booking.coupon = coupon._id;
+    }
+    newBooking.price = data.price = calculatedPrice;
+
+    console.log("newBooking", newBooking);
 
     await Booking.updateOne({ _id: bookingId }, newBooking);
 
     res.status(200).json({
       success: true,
+      ...data
     });
   } catch (err:any) {
     console.log(err);
