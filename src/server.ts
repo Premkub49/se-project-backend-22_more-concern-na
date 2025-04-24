@@ -9,6 +9,7 @@ import connectDB from './config/db';
 import reports from './routes/reports'
 import reviews from './routes/reviews';
 import cors from 'cors';
+import inventory from './routes/inventory';
 
 configDotenv({ path: '.env' });
 
@@ -23,6 +24,7 @@ app.use('/users',users);
 app.use('/bookings', bookings);
 app.use('/reports', reports);
 app.use('/reviews', reviews);
+app.use('/inventory', inventory);
 
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 5050;
