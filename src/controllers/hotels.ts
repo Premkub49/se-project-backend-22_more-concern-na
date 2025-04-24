@@ -21,7 +21,6 @@ export async function getHotels(
   next: NextFunction,
 ) {
   try {
-    let query;
     const reqQuery = {...req.query};
     const removeFields = ["select", "sort", "page", "limit"];
     removeFields.forEach((param)=> delete reqQuery[param]);
@@ -38,7 +37,54 @@ export async function getHotels(
       };
     }
 
-    query = Hotel.find(filters);
+    // Check if we need to sort by average rating
+    if (typeof req.query.sort === "string" && req.query.sort === "rating") {
+      const page = typeof req.query.page === 'string' ? parseInt(req.query.page, 10) : 1;
+      const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit, 10) : 25;
+      const startIndex = (page - 1) * limit;
+      
+      // Use aggregate for rating sort
+      const aggregateResults = await Hotel.aggregate([
+        { $match: filters }, // Apply filters directly
+        {
+          $addFields: {
+            rating: { 
+              $cond: [
+                { $eq: ["$ratingCount", 0] }, // Check if ratingCount is 0
+                0, // If ratingCount is 0, set rating to 0
+                { $divide: ["$ratingSum", "$ratingCount"] } // Otherwise compute the average
+              ]
+            }
+          }
+        },
+        { $sort: { rating: -1 } }, // -1 for descending order
+        {
+          $facet: {
+            totalCount: [{ $count: 'count' }],
+            paginatedResults: [{ $skip: startIndex }, { $limit: limit }]
+          }
+        }
+      ]);
+      
+      // Extract results and count
+      const hotels = aggregateResults[0].paginatedResults;
+      const total = aggregateResults[0].totalCount.length > 0 ? aggregateResults[0].totalCount[0].count : 0;
+      
+      // Setup pagination
+      const endIndex = page * limit;
+      const pagination: { count: number; next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {
+        count: hotels.length
+      };
+      
+      if (endIndex < total) pagination.next = { page: page + 1, limit };
+      if (startIndex > 0) pagination.prev = { page: page - 1, limit };
+      
+      res.status(200).json({ success: true, total, pagination, data: hotels });
+      return;
+    }
+    
+    // If not sorting by rating, use the regular query flow
+    let query = Hotel.find(filters);
 
     // projection
     if (typeof req.query.select === "string") {
@@ -46,7 +92,7 @@ export async function getHotels(
       query = query.select(fields);
     }
 
-    // sort
+    // regular sort
     if (typeof req.query.sort === "string") {
       const sortBy = req.query.sort.split(",").join(" ");
       query = query.sort(sortBy);
@@ -59,27 +105,25 @@ export async function getHotels(
     const limit = typeof req.query.limit === 'string' ? parseInt(req.query.limit, 10) : 25;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-    const total = await Hotel.countDocuments();
+    const total = await Hotel.countDocuments(filters);
     query = query.skip(startIndex).limit(limit);
 
     const hotels = await query;
 
     // executing pagination
     const pagination: { count: number; next?: { page: number; limit: number }; prev?: { page: number; limit: number } } = {
-      count: 0
+      count: hotels.length
     };
-    pagination.count = hotels.length;
+    
     if (endIndex < total) pagination.next = { page: page + 1, limit };
     if (startIndex > 0) pagination.prev = { page: page - 1, limit };
-    res
-      .status(200)
-      .json({ success: true, total,pagination, data: hotels });
+    
+    res.status(200).json({ success: true, total, pagination, data: hotels });
   } catch (err:any) {
     if (err.message) {
       res.status(400).json({ success: false, msg: err.message });
     } else {
-      //res.status(500).json({ success: false, msg: "Server Error" });
-      responseErrorMsg(res,500,err,'Server error');
+      responseErrorMsg(res, 500, err, 'Server error');
     }
   }
 }
