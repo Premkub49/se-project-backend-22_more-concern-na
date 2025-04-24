@@ -14,7 +14,7 @@ export interface IBooking {
   startDate: Date;
   endDate: Date;
   rooms: BookingType[];
-  coupon?: ObjectId;
+  coupon: ObjectId;
   createdAt: Date;
 }
 
@@ -27,7 +27,7 @@ export interface PBooking {
   startDate: Date;
   endDate: Date;
   rooms: BookingType[];
-  coupon?: ObjectId;
+  coupon: ObjectId;
   createdAt: Date;
 }
 
