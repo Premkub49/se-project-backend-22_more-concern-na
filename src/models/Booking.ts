@@ -74,7 +74,7 @@ const BookingSchema = new mongoose.Schema({
     ],
     required: true,
   },
-  couponId: {
+  coupon: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Coupon',
   },
