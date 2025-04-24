@@ -260,6 +260,10 @@ export async function useRedeemableInInventory(req: Request, res: Response, next
     }
     await user.save();
 
+    if (req.params.noResponse === "true") {
+      return;
+    }
+
     res.status(200).json({
       success: true,
       data: user.inventory

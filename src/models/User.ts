@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import mongoose, { ObjectId } from 'mongoose';
-interface UserRedeemable {
+export interface UserRedeemable {
   redeemableId: ObjectId;
   count: number;
 }
