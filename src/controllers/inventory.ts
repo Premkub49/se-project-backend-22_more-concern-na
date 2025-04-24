@@ -102,6 +102,8 @@ export async function getCouponsInInventory(req: Request, res: Response, next: N
       return;
     }
 
+    pagination.count = coupons.length;
+
     res.status(200).json({
       success: true,
       total: total,
@@ -163,6 +165,7 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
             description: '$redeemable.description',
             point: '$redeemable.point',
             picture: '$redeemable.picture',
+            count: '$inventory.count',
             _id: 0
           }
         }
@@ -205,6 +208,8 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
       res.status(404).json({ success: false, msg: "No coupons found" });
       return;
     }
+
+    pagination.count = coupons.length;
 
     res.status(200).json({
       success: true,
