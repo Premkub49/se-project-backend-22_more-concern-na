@@ -588,7 +588,7 @@ export async function updateBooking(
         return;
       }
 
-      if (!coupon.discount) {
+      if (coupon.discount == null) {
         res.status(400).json({ success: false, msg: 'Not a Coupon' });
         return;
       }
