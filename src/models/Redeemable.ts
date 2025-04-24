@@ -5,9 +5,10 @@ export interface IRedeemable {
   name: string;
   description?: string;
   picture?: string;
-  pointUse: number;
+  point: number;
   discount?: number;
-  remainCount: number;
+  expire?: Date;
+  remain: number;
 }
 const RedeemableSchema = new mongoose.Schema({
   type: {
@@ -30,14 +31,17 @@ const RedeemableSchema = new mongoose.Schema({
       'Please provide a valid URL',
     ],
   },
-  pointUse: {
+  point: {
     type: Number,
     required: [true, 'Please add a pointUse'],
   },
   discount: {
     type: Number,
   },
-  remainCount: {
+  expire: {
+    type: Date,
+  },
+  remain: {
     type: Number,
     required: [true, 'Please add a remainCount'],
   },

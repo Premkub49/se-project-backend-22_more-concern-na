@@ -14,6 +14,7 @@ export interface IBooking {
   startDate: Date;
   endDate: Date;
   rooms: BookingType[];
+  coupon?: ObjectId;
   createdAt: Date;
 }
 
@@ -26,6 +27,7 @@ export interface PBooking {
   startDate: Date;
   endDate: Date;
   rooms: BookingType[];
+  coupon?: ObjectId;
   createdAt: Date;
 }
 
@@ -71,6 +73,10 @@ const BookingSchema = new mongoose.Schema({
       },
     ],
     required: true,
+  },
+  coupon: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Coupon',
   },
   createdAt: {
     type: Date,

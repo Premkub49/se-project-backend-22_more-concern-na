@@ -70,3 +70,92 @@ export async function updateRole(req: Request, res: Response, next: NextFunction
     responseErrorMsg(res,500,err,'Server error');
   }
 }
+
+export async function updateUserPoint(req: Request, res:Response, next: NextFunction){
+  //console.log("test");
+  try{
+    if (!req.user||req.user.role!="admin") {
+      res
+        .status(401)
+        .json({ success: false, msg: 'Not authorized to access this route' });
+      return;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(req.body, "point") || Object.keys(req.body).length !== 1) {
+      res.status(400).json({ success: false, msg: "Only 'point' field can be updated" });
+      return;
+    }
+    const point = req.body.point;
+    if(point === null){
+      res.status(400).json({ success: false, msg: "point can not be null" });
+      return;
+    }
+    if(point < 0){
+      res.status(400).json({ success: false, msg: "point can not be less than 0" });
+      return;
+    }
+    const user = await User.findById(req.params.userId);
+    if(!user){
+      res
+      .status(404)
+      .json({ success: false, msg: 'user not found' });
+    return;
+    }
+    
+    await User.updateOne(
+          { _id: req.params.userId },
+          { $set: { point } }
+        );
+        res.status(200).json({ success: true , point:point});
+  }catch(err: any){
+    console.log(err);
+    //res.status(500).json({ success: false, msg: 'Server error' });
+    responseErrorMsg(res,500,err,'Server error');
+  }
+}
+
+export async function getUsersPoints(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    // Get page and pageSize from request body, default to page 1 and pageSize 10
+    const { page = 1, pageSize = 10 } = req.body;
+
+    // Validate input
+    const parsedPage = Math.max(1, parseInt(page));
+    const parsedPageSize = Math.max(1, parseInt(pageSize));
+
+    const skip = (parsedPage - 1) * parsedPageSize;
+
+    // Get total count of documents
+    const total = await User.countDocuments();
+
+    // Get paginated users
+    const users = await User.find().select('id name email point')
+      .skip(skip)
+      .limit(parsedPageSize);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(total / parsedPageSize);
+
+    res.status(200).json({
+      success: true,
+      pagination: {
+        next:{
+          page: parsedPage+1,
+          limit: parsedPageSize
+        },
+        prev:{
+          page: parsedPage-1,
+          limit: parsedPageSize
+        }
+      },
+      data: users,
+    });
+  } catch (err: any) {
+    console.log(err);
+    responseErrorMsg(res, 500, err, 'Server error');
+  }
+}
