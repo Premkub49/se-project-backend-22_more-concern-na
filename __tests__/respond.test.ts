@@ -1,5 +1,5 @@
 // tests/controllers/respond.test.ts
-import { addRespond } from '../src/controllers/responds';
+import { addRespond, updateRespond } from '../src/controllers/responds';
 import type { NextFunction, Request, Response } from 'express';
 
 /* ===== Mock Models ===== */
@@ -240,4 +240,243 @@ describe('US 1-6 hotel manager add response to review', () => {
   });
 });
 
+/*
+US 1-7
+As a hotel manager
+I want to edit my respond to reviews written about my hotel
+So that I can correct my word in responses
+*/
+describe('US 1-7 hotel manager update response to review', () => {
+  const baseReq = {
+    params: { reviewId },
+    user: { _id: userId, role: 'hotelManager', hotel: hotelId },
+    body: { title: 'Updated Response', text: 'Thank you for your valuable feedback' },
+  } as unknown as Request;
 
+  // Mock data
+  const mockReviewWithReply = {
+    _id: reviewId,
+    booking: {
+      hotel: hotelId
+    },
+    reply: {
+      _id: 'replyId123',
+      title: 'Existing response',
+      text: 'Some text'
+    }
+  };
+
+  const mockReviewNoReply = {
+    _id: reviewId,
+    booking: {
+      hotel: hotelId
+    },
+    reply: null
+  };
+
+  const mockReviewDifferentHotel = {
+    _id: reviewId,
+    booking: {
+      hotel: '507f191e810c19729de860bc' // Different hotel ID
+    },
+    reply: {
+      _id: 'replyId123',
+      title: 'Existing response',
+      text: 'Some text'
+    }
+  };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('✅ allows hotel manager to update their response', async () => {
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(mockReviewWithReply)
+    }));
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(Review.updateOne).toHaveBeenCalledWith(
+      { _id: reviewId },
+      { 
+        $set: { 
+          reply: { 
+            title: 'Updated Response', 
+            text: 'Thank you for your valuable feedback',
+            _id: 'replyId123'
+          } 
+        } 
+      }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ success: true });
+  });
+
+  it('✅ allows admin to update any response', async () => {
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(mockReviewWithReply)
+    }));
+    
+    const req = { 
+      ...baseReq,
+      user: { _id: userId, role: 'admin' }
+    } as unknown as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+    
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(Review.updateOne).toHaveBeenCalledWith(
+      { _id: reviewId },
+      { 
+        $set: { 
+          reply: { 
+            title: 'Updated Response', 
+            text: 'Thank you for your valuable feedback',
+            _id: 'replyId123'
+          } 
+        } 
+      }
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ success: true });
+  });
+
+  it('❌ blocks update when review has no reply', async () => {
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(mockReviewNoReply)
+    }));
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Respond not found'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks update when user is not authorized', async () => {
+    // Arrange
+    const req = { 
+      ...baseReq,
+      user: { _id: userId, role: 'user' }
+    } as unknown as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Not authorized to access this route'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks hotel manager from updating response for another hotel', async () => {
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(mockReviewDifferentHotel)
+    }));
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Not authorized to access this route'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks update when review not found', async () => {
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(null)
+    }));
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Review not found'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks update when booking not found', async () => {
+    // Arrange
+    const mockReviewNoBooking = {
+      _id: reviewId,
+      booking: null,
+      reply: {
+        _id: 'replyId123',
+        title: 'Existing response',
+        text: 'Some text'
+      }
+    };
+    
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(mockReviewNoBooking)
+    }));
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Booking not found'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+});
