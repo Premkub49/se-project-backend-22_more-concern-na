@@ -1,5 +1,5 @@
 // tests/controllers/reviews.addReview.test.ts
-import { addReview, updateReview } from '../src/controllers/reviews';
+import { addReview, deleteReview, updateReview } from '../src/controllers/reviews';
 import type { Request, Response, NextFunction } from 'express';
 
 /* ===== Mock Models ===== */
@@ -9,7 +9,7 @@ jest.mock('../src/models/Booking', () => ({
 }));
 jest.mock('../src/models/Review', () => ({
   __esModule: true,
-  default: { findOne: jest.fn(), create: jest.fn(), updateOne: jest.fn(), findById: jest.fn() },
+  default: { findOne: jest.fn(), create: jest.fn(), updateOne: jest.fn(), findById: jest.fn(), deleteOne: jest.fn() },
 }));
 jest.mock('../src/models/Hotel', () => ({
   __esModule: true,
@@ -243,4 +243,71 @@ describe('US 1-2 customer update review', () => {
     );
     expect(Review.updateOne).not.toHaveBeenCalled();
   });
+});
+
+
+/**
+ * US 1-3
+As a customer
+I want to delete my review
+So that I can remove content I no longer wish to be public if I've changed my mind or made an error.
+ */
+describe('US 1-3 customer delete review', () => {
+    
+    const baseReq = {
+        params: { reviewId },
+        user: { _id: userId, role: 'user' },
+    } as unknown as Request;
+    
+    const mockReview = {
+        _id: reviewId,
+        booking: bookingId,
+        rating: 5,
+    };
+    
+    const mockBooking = {
+        _id: bookingId,
+        user: userId,
+        hotel: hotelId,
+    };
+    
+    beforeEach(() => jest.clearAllMocks());
+    
+    it('✅ allows user to delete their review', async () => {
+        (Review.findById as jest.Mock).mockResolvedValue(mockReview);
+        (Booking.findById as jest.Mock).mockResolvedValue(mockBooking);
+        (Review.deleteOne as jest.Mock).mockResolvedValue({ deletedCount: 1 });
+    
+        const req = { ...baseReq } as jest.Mocked<Request>;
+        const res = mockRes();
+    
+        await deleteReview(req, res);
+    
+        expect(Review.deleteOne).toHaveBeenCalledWith({ _id: reviewId });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ success: true });
+    });
+    
+    it('❌ blocks delete if user is not the owner', async () => {
+        (Review.findById as jest.Mock).mockResolvedValue(mockReview);
+        (Booking.findById as jest.Mock).mockResolvedValue({
+        ...mockBooking,
+        user: 'someOtherUserId',
+        });
+        (Review.deleteOne as jest.Mock).mockResolvedValue({ deletedCount: 0 });
+    
+        const req = { ...baseReq } as jest.Mocked<Request>;
+        const res = mockRes();
+    
+        await deleteReview(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+            success: false,
+            msg: 'Not authorized to access this route',
+        }),
+        );
+        expect(Review.deleteOne).not.toHaveBeenCalled();
+    });
 });
