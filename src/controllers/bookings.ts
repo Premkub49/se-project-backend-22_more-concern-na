@@ -6,6 +6,7 @@ import responseErrorMsg from './libs/responseMsg';
 import User, { IUser, UserRedeemable } from '../models/User';
 import Redeemable, { IRedeemable } from '../models/Redeemable';
 import { useRedeemableInInventory } from './inventory';
+import Data from 'models/Data';
 
 interface pagination {
   next?: { page: number; limit: number; };
@@ -710,7 +711,23 @@ export async function checkInBooking(
       res.status(400).json({ success: false, msg: 'Booking is not reserved' });
       return;
     }
-
+    const user = await User.findById(booking.user);
+    const priceToPoint = await Data.find({name: "priceToPoint"});
+    if(!user){
+      responseErrorMsg(res,404,'Booking User not found', 'Not found');
+      return;
+    }
+    if(!priceToPoint){
+      responseErrorMsg(res,404,'PriceToPoint not found', 'Not found');
+      return;
+    }
+    const priceToPointValue = priceToPoint?.[0]?.value as number;
+    /*if (typeof priceToPointValue !== 'number') {
+      responseErrorMsg(res, 400, 'Invalid priceToPoint value', 'Invalid data');
+      return;
+    }*/
+    user.point += Math.floor(booking.price / priceToPointValue);
+    await user.save();
     await Booking.updateOne({ _id: bookingId }, { status: 'checkedIn' });
 
     res.status(200).json({
