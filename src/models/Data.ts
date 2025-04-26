@@ -6,10 +6,10 @@ export interface IData {
 const DataSchema = new mongoose.Schema ({
     name: {
         type: String,
-        require: true
+        require: [true, 'Please add name'],
+        unique: true
     },
     value: {
-        require: true
     }
 })
 
