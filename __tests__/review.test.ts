@@ -1,5 +1,5 @@
 // tests/controllers/reviews.addReview.test.ts
-import { addReview, deleteReview, updateReview } from '../src/controllers/reviews';
+import { addReview, deleteReview, updateReview , getHotelReviews} from '../src/controllers/reviews';
 import type { Request, Response, NextFunction } from 'express';
 
 /* ===== Mock Models ===== */
@@ -9,7 +9,7 @@ jest.mock('../src/models/Booking', () => ({
 }));
 jest.mock('../src/models/Review', () => ({
   __esModule: true,
-  default: { findOne: jest.fn(), create: jest.fn(), updateOne: jest.fn(), findById: jest.fn(), deleteOne: jest.fn() },
+  default: { findOne: jest.fn(), create: jest.fn(), updateOne: jest.fn(), findById: jest.fn(), deleteOne: jest.fn(), find: jest.fn() },
 }));
 jest.mock('../src/models/Hotel', () => ({
   __esModule: true,
@@ -310,4 +310,58 @@ describe('US 1-3 customer delete review', () => {
         );
         expect(Review.deleteOne).not.toHaveBeenCalled();
     });
+});
+
+/**
+US 1-4
+As a guest
+I want to read reviews from other traveler in that hotel
+So that I can decide whether to book this hotel in the future.
+ */
+//pass for now, will be implemented in the future
+
+
+
+/**
+ * US 1-5
+As an admin
+I want to delete review form any customer
+So that the website don't have bad reviews (spam, scam, etc.).
+ */
+describe('US 1-5 admin delete review', () => {
+        
+    const baseReq = {
+        params: { reviewId },
+        user: { _id: '507f191e810c19729de860ab', role: 'admin' },
+    } as unknown as Request;
+    
+    const mockReview = {
+        _id: reviewId,
+        booking: bookingId,
+        rating: 5,
+    };
+    
+    const mockBooking = {
+        _id: bookingId,
+        user: userId,
+        hotel: hotelId,
+    };
+    
+    beforeEach(() => jest.clearAllMocks());
+    
+    it('✅ allows admin to delete any review', async () => {
+        (Review.findById as jest.Mock).mockResolvedValue(mockReview);
+        (Booking.findById as jest.Mock).mockResolvedValue(mockBooking);
+        (Review.deleteOne as jest.Mock).mockResolvedValue({ deletedCount: 1 });
+    
+        const req = { ...baseReq } as jest.Mocked<Request>;
+        const res = mockRes();
+    
+        await deleteReview(req, res);
+    
+        expect(Review.deleteOne).toHaveBeenCalledWith({ _id: reviewId });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ success: true });
+    });
+
 });
