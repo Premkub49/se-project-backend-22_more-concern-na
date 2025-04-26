@@ -190,3 +190,90 @@ describe('US 1-10 admin update report ignore status', () => {
     );
   });
 });
+
+/*
+US 1-9
+As a hotel manager
+I want to report reviews written about my hotel to admin
+So that my hotel don't have bad reviews (spam, scam, etc.).
+*/
+describe('US 2-3 user add report for review', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('✅ creates a new report', async () => {
+    // Arrange
+    const reportData = {
+      reportReason: 'inappropriate',
+      review: 'review1',
+    };
+
+    const req = {
+      body: reportData,
+    } as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Mock create
+    (Report.create as jest.Mock).mockResolvedValue({
+      _id: 'newReport',
+      ...reportData,
+    });
+
+    // Act
+    await addReport(req, res, next);
+
+    // Assert
+    expect(Report.create).toHaveBeenCalledWith(reportData);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ success: true });
+  });
+
+  it('❌ handles validation errors', async () => {
+    // Arrange
+    const req = {
+      body: { invalidField: 'value' }, // Missing required fields
+    } as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Mock create to throw a validation error
+    (Report.create as jest.Mock).mockRejectedValue({
+      message: 'Validation failed',
+    });
+
+    // Act
+    await addReport(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Validation failed',
+      })
+    );
+  });
+
+  it('❌ handles server errors', async () => {
+    // Arrange
+    const req = {
+      body: { reportReason: 'inappropriate', review: 'review1' },
+    } as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Force a server error without a message
+    (Report.create as jest.Mock).mockRejectedValue({});
+
+    // Act
+    await addReport(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+      })
+    );
+  });
+});
