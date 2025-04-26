@@ -1,5 +1,5 @@
 // tests/controllers/reviews.addReview.test.ts
-import { addReview } from '../src/controllers/reviews';
+import { addReview, updateReview } from '../src/controllers/reviews';
 import type { Request, Response, NextFunction } from 'express';
 
 /* ===== Mock Models ===== */
@@ -9,7 +9,7 @@ jest.mock('../src/models/Booking', () => ({
 }));
 jest.mock('../src/models/Review', () => ({
   __esModule: true,
-  default: { findOne: jest.fn(), create: jest.fn() },
+  default: { findOne: jest.fn(), create: jest.fn(), updateOne: jest.fn(), findById: jest.fn() },
 }));
 jest.mock('../src/models/Hotel', () => ({
   __esModule: true,
@@ -32,6 +32,7 @@ const mockRes = (): Response => {
 const userId = '507f191e810c19729de860aa';
 const hotelId = '507f191e810c19729de860bb';
 const bookingId = '507f191e810c19729de860cc';
+const reviewId = '507f191e810c19729de860dd';
 
 /*
 US 1-1
@@ -81,6 +82,7 @@ describe('US 1-1 customer add review', () => {
             }),
         );
         expect(fakeHotel.save).toHaveBeenCalled();
+        expect(fakeHotel.ratingCount).toBe(1);
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ success: true });
     });
@@ -142,4 +144,103 @@ describe('US 1-1 customer add review', () => {
         expect(Review.create).not.toHaveBeenCalled();
     }
     );
+});
+
+/* 
+US 1-2
+As a customer
+I want to edit my review
+So that I can correct mistakes or update my feedback
+*/
+
+describe('US 1-2 customer update review', () => {
+  const baseReq = {
+    params: { reviewId },
+    user: { _id: userId, role: 'user' },
+    body: { rating: 4, title: 'Good', text: 'Updated review text' },
+  } as unknown as Request;
+
+  const review = {
+    _id: reviewId,
+    booking: bookingId,
+    rating: 5,
+  };
+
+  const booking = {
+    _id: bookingId,
+    user: userId,
+    hotel: hotelId,
+  };
+
+  const fakeHotel = { 
+    ratingSum: 10,
+    save: jest.fn(),
+  };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('✅ allows user to update their review', async () => {
+    (Review.findById as jest.Mock).mockResolvedValue(review);
+    (Booking.findById as jest.Mock).mockResolvedValue(booking);
+    (Hotel.findById as jest.Mock).mockResolvedValue(fakeHotel);
+
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+
+    await updateReview(req, res);
+
+    expect(Review.updateOne).toHaveBeenCalledWith(
+      { _id: reviewId },
+      { $set: { rating: 4, title: 'Good', text: 'Updated review text' } },
+    );
+    expect(fakeHotel.save).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ success: true });
+  });
+
+  it('❌ blocks update if user is not the owner', async () => {
+    (Review.findById as jest.Mock).mockResolvedValue(review);
+    (Booking.findById as jest.Mock).mockResolvedValue({
+      ...booking,
+      user: 'someOtherUserId',
+    });
+    (Hotel.findById as jest.Mock).mockResolvedValue(fakeHotel);
+
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+
+    await updateReview(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Not authorized to access this route',
+      }),
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks update if rating is invalid', async () => {
+    (Review.findById as jest.Mock).mockResolvedValue(review);
+    (Booking.findById as jest.Mock).mockResolvedValue(booking);
+    (Hotel.findById as jest.Mock).mockResolvedValue(fakeHotel);
+
+    const req = {
+      ...baseReq,
+      body: { rating: 6, title: 'Too good', text: 'Should fail' },
+    } as unknown as Request;
+    const res = mockRes();
+
+    await updateReview(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Rating must be between 1 and 5',
+      }),
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
 });
