@@ -28,7 +28,7 @@ export async function getCouponsInInventory(req: Request, res: Response, next: N
       res.status(404).json({ success: false, msg: "User not found" });
       return;
     }
-    if (!user.inventory) {
+    if (!user.inventory || user.inventory.length <= 0) {
       res.status(404).json({ success: false, msg: "User has no items in inventory" });
       return;
     }
@@ -135,7 +135,7 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
       res.status(404).json({ success: false, msg: "User not found" });
       return;
     }
-    if (!user.inventory) {
+    if (!user.inventory || user.inventory.length <= 0) {
       res.status(404).json({ success: false, msg: "User has no items in inventory" });
       return;
     }
@@ -170,7 +170,6 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
           }
         }
     ];
-
     const pageSize = parseInt(req.query.pageSize as string) || 10;
     const page = parseInt(req.query.page as string) || 1;
     const pagination: pagination = {}
@@ -219,6 +218,7 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
     })
   }
   catch (err: any) {
+    console.log(err);
     responseErrorMsg(res, 500, err, "Server error");
   }
 }
