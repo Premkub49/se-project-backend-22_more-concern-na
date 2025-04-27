@@ -7,7 +7,9 @@
     "start": "npm run build && npx pm2 start ./dist/server.js --name se-mcn-backend",
     "dev": "npx tsx watch --include \"./src/**/*\" --include \".env\" ./src/server.ts",
     "fmt": "npx prettier --write ./src/**/*.{js,ts,jsx,tsx}",
-    "test": "jest --config jest.config.js"
+    "test": "jest --config jest.config.js",
+    "test-coverage" : "jest --watchAll --coverage"
+
   },
   "type": "commonjs",
   "dependencies": {
