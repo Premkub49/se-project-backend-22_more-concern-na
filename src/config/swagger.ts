@@ -13,10 +13,10 @@ const swaggerOptions = {
         url: 'http://localhost:5050',
         description: 'Development server',
       },
-      {
-        url: 'https://se-project-backend-22-more-concern-na.vercel.app',
-        description: 'Production server'
-      }
+    //   {
+    //     url: 'https://se-project-backend-22-more-concern-na.vercel.app',
+    //     description: 'Production server'
+    //   }
     ],
     components: {
       securitySchemes: {
