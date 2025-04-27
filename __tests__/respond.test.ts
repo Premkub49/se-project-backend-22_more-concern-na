@@ -10,6 +10,7 @@ jest.mock('../src/models/Review', () => ({
 
 import Review from '../src/models/Review';
 import mongoose from 'mongoose';
+import responseErrorMsg from '../src/controllers/libs/responseMsg';
 // Removed unused mongoose import
 
 /* ===== Helper: response mock ===== */
@@ -238,6 +239,54 @@ describe('US 1-6 hotel manager add response to review', () => {
     );
     expect(Review.updateOne).not.toHaveBeenCalled();
   });
+
+  it('❌ blocks response when req.user is null', async () => {
+    // Arrange
+    const req = { 
+      ...baseReq,
+      user: null
+    } as unknown as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await addRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Not authorized to access this route'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks catch error', async () => {
+    
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => {
+      throw new Error('Database error');
+    });
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await addRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Server error'
+      })
+    );
+  });
+
 });
 
 /*
@@ -479,6 +528,53 @@ describe('US 1-7 hotel manager update response to review', () => {
     );
     expect(Review.updateOne).not.toHaveBeenCalled();
   });
+
+  it('❌ blocks response when req.user is null', async () => {
+    // Arrange
+    const req = { 
+      ...baseReq,
+      user: null
+    } as unknown as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Not authorized to access this route'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks catch error', async () => {
+    
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => {
+      throw new Error('Database error');
+    });
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Server error'
+      })
+    );
+  });
 });
 
 /*
@@ -702,5 +798,52 @@ describe('US 1-8 hotel manager delete response to review', () => {
       })
     );
     expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+  it('❌ blocks response when req.user is null', async () => {
+    // Arrange
+    const req = { 
+      ...baseReq,
+      user: null
+    } as unknown as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await deleteRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Not authorized to access this route'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
+it('❌ blocks catch error', async () => {
+    
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => {
+      throw new Error('Database error');
+    });
+    
+    const req = { ...baseReq } as jest.Mocked<Request>;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await deleteRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Server error'
+      })
+    );
   });
 });

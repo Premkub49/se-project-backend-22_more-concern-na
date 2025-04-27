@@ -197,7 +197,7 @@ As a hotel manager
 I want to report reviews written about my hotel to admin
 So that my hotel don't have bad reviews (spam, scam, etc.).
 */
-describe('US 2-3 user add report for review', () => {
+describe('US 1-9 admin add report for review', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('✅ creates a new report', async () => {
