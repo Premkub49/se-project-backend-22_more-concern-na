@@ -6,7 +6,7 @@ import responseErrorMsg from './libs/responseMsg';
 import User, { IUser, UserRedeemable } from '../models/User';
 import Redeemable, { IRedeemable } from '../models/Redeemable';
 import { useRedeemableInInventory } from './inventory';
-import Data from 'models/Data';
+import Data from '../models/Data';
 
 interface pagination {
   next?: { page: number; limit: number; };

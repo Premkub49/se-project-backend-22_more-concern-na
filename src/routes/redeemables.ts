@@ -1,7 +1,6 @@
 import { addRedeemable, getCouponsInRedeemables, getGift, getGiftsInRedeemables, getPriceToPoint, updatePriceToPoint, userRedemption } from "../controllers/redeemables";
 import express from "express";
 import { authorize, protect } from "../middleware/auth";
-import { updateBooking } from "controllers/bookings";
 
 const router = express.Router();
 
