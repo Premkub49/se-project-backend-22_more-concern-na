@@ -23,12 +23,11 @@ export async function getCouponsInInventory(req: Request, res: Response, next: N
         model: "Redeemable"
       }
     })
-
     if (!user) {
       res.status(404).json({ success: false, msg: "User not found" });
       return;
     }
-    if (!user.inventory || user.inventory.length <= 0) {
+    if (!user.inventory || user.inventory.length <= 0 || !user.inventory.some((item: any) => item.redeemableId && item.redeemableId.type === 'coupon')) {
       res.status(404).json({ success: false, msg: "User has no items in inventory" });
       return;
     }
@@ -135,7 +134,7 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
       res.status(404).json({ success: false, msg: "User not found" });
       return;
     }
-    if (!user.inventory || user.inventory.length <= 0) {
+    if (!user.inventory || user.inventory.length <= 0 || !user.inventory.some((item: any) => item.redeemableId && item.redeemableId.type === 'gift')) {
       res.status(404).json({ success: false, msg: "User has no items in inventory" });
       return;
     }
