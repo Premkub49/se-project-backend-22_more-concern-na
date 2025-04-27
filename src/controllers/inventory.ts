@@ -170,7 +170,6 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
           }
         }
     ];
-    console.log(await User.aggregate(aggregate));
     const pageSize = parseInt(req.query.pageSize as string) || 10;
     const page = parseInt(req.query.page as string) || 1;
     const pagination: pagination = {}
