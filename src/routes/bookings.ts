@@ -17,7 +17,8 @@ router.use('/:bookingId/reviews', reviewRouter);
 
 router.route('/:id/checkIn').put(protect, authorize("admin", "hotelManager"), checkInBooking);
 router.route('/:id/completed').put(protect, authorize("admin", "hotelManager"), completeBooking);
-router.route('/').get(protect, getBookings).post(protect,authorize("user"),addBooking);
+router.route('/').get(protect, getBookings)
+.post(protect,authorize("user"),addBooking);
 router
   .route('/:id')
   .get(protect, getBooking)
