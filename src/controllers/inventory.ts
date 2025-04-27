@@ -201,20 +201,20 @@ export async function getGiftsInInventory(req: Request, res: Response, next: Nex
       }
     }
 
-    const coupons = await User.aggregate(aggregate).skip(startIndex).limit(pageSize);
+    const gifts = await User.aggregate(aggregate).skip(startIndex).limit(pageSize);
 
-    if (coupons.length === 0) {
-      res.status(404).json({ success: false, msg: "No coupons found" });
+    if (gifts.length === 0) {
+      res.status(404).json({ success: false, msg: "No gifts found" });
       return;
     }
 
-    pagination.count = coupons.length;
+    pagination.count = gifts.length;
 
     res.status(200).json({
       success: true,
       total: total,
       pagination: pagination,
-      data: coupons
+      data: gifts
     })
   }
   catch (err: any) {
