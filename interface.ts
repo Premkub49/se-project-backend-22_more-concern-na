@@ -58,7 +58,7 @@ interface HotelAvailabilityResponse extends GenericResponse {
 
 //------UserSchema Interface-----
 interface UserRedeemable {
-    redeemableId: string;
+    redeemableId: string | IRedeemable[];
     count: number;
 }
 interface IUser {
