@@ -11,6 +11,8 @@ import reviews from './routes/reviews';
 import cors from 'cors';
 import inventory from './routes/inventory';
 import redeemables from './routes/redeemables';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './config/swagger';
 
 configDotenv({ path: '.env' });
 
@@ -27,6 +29,7 @@ app.use('/reports', reports);
 app.use('/reviews', reviews);
 app.use('/inventory', inventory);
 app.use('/redeemables',redeemables);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 5050;
 if (process.env.NODE_ENV === "production") {
