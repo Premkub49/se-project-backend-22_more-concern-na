@@ -9,7 +9,7 @@ router.get('/gifts/:giftId',getGift)
 .get('/coupons',getCouponsInRedeemables);
 router.route('/creation').post(protect,authorize("admin"),addRedeemable);
 router.route('/redemption').post(protect,authorize('user'),userRedemption);
-router.route('/price-to-point').get(protect,getPriceToPoint)
+router.route('/price-to-point').get(getPriceToPoint)
 .put(protect, authorize('admin'), updatePriceToPoint);
 export default router;
 
