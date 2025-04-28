@@ -4,7 +4,7 @@
   "main": "src/server.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "npm run build && npx pm2 start ./dist/server.js --name se-mcn-backend",
+    "start": "node ./dist/server.js",
     "dev": "npx tsx watch --include \"./src/**/*\" --include \".env\" ./src/server.ts",
     "fmt": "npx prettier --write ./src/**/*.{js,ts,jsx,tsx}",
     "test": "jest --config jest.config.js",
