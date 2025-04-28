@@ -3,6 +3,11 @@ import User, { IUser } from '../models/User';
 import mongoose from "mongoose";
 import sendTokenResponse from './auth';
 import responseErrorMsg from './libs/responseMsg';
+interface Pagination {
+  next?: { page: number; limit: number; };
+  prev?: { page: number; limit: number; };
+  count?: number;
+}
 export async function getUsers(
   req: Request,
   res: Response,
@@ -120,40 +125,48 @@ export async function getUsersPoints(
   next: NextFunction,
 ) {
   try {
-    // Get page and pageSize from request body, default to page 1 and pageSize 10
-    const { page = 1, pageSize = 10 } = req.body;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const pagination: Pagination = {}
+    const total = (await User.countDocuments());
+    const totalPage = Math.ceil(total / pageSize);
 
-    // Validate input
-    const parsedPage = Math.max(1, parseInt(page));
-    const parsedPageSize = Math.max(1, parseInt(pageSize));
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = page * pageSize;
 
-    const skip = (parsedPage - 1) * parsedPageSize;
-
-    // Get total count of documents
-    const total = await User.countDocuments();
-
-    // Get paginated users
-    const users = await User.find().select('id name email point')
-      .skip(skip)
-      .limit(parsedPageSize);
-
-    // Calculate total pages
-    const totalPages = Math.ceil(total / parsedPageSize);
-
+    if (endIndex < total) {
+      if(page == totalPage - 1) {
+        const nextLimit = total % pageSize === 0 ? pageSize : total % pageSize;
+        pagination.next = {
+          page: page + 1,
+          limit: nextLimit
+        }
+      }
+      else {
+        pagination.next = {
+          page: page + 1,
+          limit: pageSize
+        }
+      }
+    }
+    if (startIndex > 0) {
+      pagination.prev = {
+        page: page - 1,
+        limit: pageSize
+      }
+    }
+    const users = await User.find().skip(startIndex).limit(pageSize); 
+    if(!users){
+      responseErrorMsg(res,404,'Not Found Users', 'Not Found');
+      return;
+    }
+    pagination.count = users.length;
     res.status(200).json({
       success: true,
-      pagination: {
-        next:{
-          page: parsedPage+1,
-          limit: parsedPageSize
-        },
-        prev:{
-          page: parsedPage-1,
-          limit: parsedPageSize
-        }
-      },
-      data: users,
-    });
+      total,
+      pagination,
+      data: users
+    })
   } catch (err: any) {
     console.log(err);
     responseErrorMsg(res, 500, err, 'Server error');
