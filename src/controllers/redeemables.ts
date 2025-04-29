@@ -162,6 +162,7 @@ export async function userRedemption(req: Request, res: Response, next: NextFunc
         }
         if(req.user.point < redeemable.point){
             responseErrorMsg(res,403,'แพงเกิน point ไม่พอ','Forbiden');
+            return;
         }
         if(redeemable.remain <= 0) {
             responseErrorMsg(res,404,'หมดแล้วจ้า','Not Found');
@@ -173,6 +174,7 @@ export async function userRedemption(req: Request, res: Response, next: NextFunc
             responseErrorMsg(res,404,'who are you','Not Found');
             return;
         }
+        user.point -= redeemable.point;
         let itemIndex = user.inventory.findIndex((data)=> data.redeemableId === redeemable._id);
         if(itemIndex !== -1 && user.inventory[itemIndex].count){
             user.inventory[itemIndex].count += 1;
