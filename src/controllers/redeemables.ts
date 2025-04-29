@@ -174,6 +174,7 @@ export async function userRedemption(req: Request, res: Response, next: NextFunc
             responseErrorMsg(res,404,'who are you','Not Found');
             return;
         }
+        user.point -= redeemable.point;
         let itemIndex = user.inventory.findIndex((data)=> data.redeemableId === redeemable._id);
         if(itemIndex !== -1 && user.inventory[itemIndex].count){
             user.inventory[itemIndex].count += 1;
