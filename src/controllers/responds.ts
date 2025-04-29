@@ -44,9 +44,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          text: req.body.text as string,
       }
       if (
-         respond.title == null || 
          respond.text == null || 
-         respond.title.trim() === "" || 
          respond.text.trim() === ""
        ){
          res
