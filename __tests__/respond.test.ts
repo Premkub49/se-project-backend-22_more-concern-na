@@ -36,7 +36,7 @@ describe('US 1-6 hotel manager add response to review', () => {
   const baseReq = {
     params: { reviewId },
     user: { _id: userId, role: 'hotelManager', hotel: hotelId },
-    body: { title: 'Thank you', text: 'We appreciate your feedback' },
+    body: { text: 'We appreciate your feedback' },
   } as unknown as Request;
 
   // Mock data
@@ -54,7 +54,6 @@ describe('US 1-6 hotel manager add response to review', () => {
       hotel: hotelId
     },
     reply: {
-      title: 'Existing response',
       text: 'Some text'
     }
   };
@@ -85,7 +84,7 @@ describe('US 1-6 hotel manager add response to review', () => {
     // Assert
     expect(Review.updateOne).toHaveBeenCalledWith(
       { _id: reviewId },
-      { $set: { reply: { title: 'Thank you', text: 'We appreciate your feedback' } } }
+      { $set: { reply: { text: 'We appreciate your feedback' } } }
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({ success: true });
@@ -110,7 +109,7 @@ describe('US 1-6 hotel manager add response to review', () => {
     // Assert
     expect(Review.updateOne).toHaveBeenCalledWith(
       { _id: reviewId },
-      { $set: { reply: { title: 'Thank you', text: 'We appreciate your feedback' } } }
+      { $set: { reply: { text: 'We appreciate your feedback' } } }
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({ success: true });
@@ -287,7 +286,7 @@ describe('US 1-6 hotel manager add response to review', () => {
     );
   });
 
-  it('❌ blocks response when title or text is empty', async () => {
+  it('❌ blocks response when text is empty', async () => {
     // Arrange
     (Review.findById as jest.Mock).mockImplementation(() => ({
       populate: jest.fn().mockResolvedValue(mockReviewNoReply)
@@ -295,7 +294,7 @@ describe('US 1-6 hotel manager add response to review', () => {
 
     const req = { 
       ...baseReq,
-      body: { title: '', text: '' } // Empty title
+      body: {text: '' }
     } as unknown as Request;
     const res = mockRes();
     const next = jest.fn() as jest.MockedFunction<NextFunction>;
@@ -308,7 +307,7 @@ describe('US 1-6 hotel manager add response to review', () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
-        msg: 'Rating, title, and text are required'
+        msg: 'text are required'
       })
     );
     expect(Review.updateOne).not.toHaveBeenCalled();
@@ -326,7 +325,7 @@ describe('US 1-7 hotel manager update response to review', () => {
   const baseReq = {
     params: { reviewId },
     user: { _id: userId, role: 'hotelManager', hotel: hotelId },
-    body: { title: 'Updated Response', text: 'Thank you for your valuable feedback' },
+    body: {text: 'Thank you for your valuable feedback' },
   } as unknown as Request;
 
   // Mock data
@@ -337,7 +336,6 @@ describe('US 1-7 hotel manager update response to review', () => {
     },
     reply: {
       _id: 'replyId123',
-      title: 'Existing response',
       text: 'Some text'
     }
   };
@@ -357,7 +355,6 @@ describe('US 1-7 hotel manager update response to review', () => {
     },
     reply: {
       _id: 'replyId123',
-      title: 'Existing response',
       text: 'Some text'
     }
   };
@@ -383,7 +380,6 @@ describe('US 1-7 hotel manager update response to review', () => {
       { 
         $set: { 
           reply: { 
-            title: 'Updated Response', 
             text: 'Thank you for your valuable feedback',
             _id: 'replyId123'
           } 
@@ -416,7 +412,6 @@ describe('US 1-7 hotel manager update response to review', () => {
       { 
         $set: { 
           reply: { 
-            title: 'Updated Response', 
             text: 'Thank you for your valuable feedback',
             _id: 'replyId123'
           } 
@@ -529,7 +524,6 @@ describe('US 1-7 hotel manager update response to review', () => {
       booking: null,
       reply: {
         _id: 'replyId123',
-        title: 'Existing response',
         text: 'Some text'
       }
     };
@@ -603,7 +597,7 @@ describe('US 1-7 hotel manager update response to review', () => {
     );
   });
 
-  it('❌ blocks update when title or text is empty', async () => {
+  it('❌ blocks update when text is empty', async () => {
     // Arrange
     (Review.findById as jest.Mock).mockImplementation(() => ({
       populate: jest.fn().mockResolvedValue(mockReviewWithReply)
@@ -611,7 +605,7 @@ describe('US 1-7 hotel manager update response to review', () => {
 
     const req = { 
       ...baseReq,
-      body: { title: '', text: '' } // Empty title
+      body: {  text: '' } 
     } as unknown as Request;
     const res = mockRes();
     const next = jest.fn() as jest.MockedFunction<NextFunction>;
@@ -624,7 +618,7 @@ describe('US 1-7 hotel manager update response to review', () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
-        msg: 'Rating, title, and text are required'
+        msg: 'text are required'
       })
     );
     expect(Review.updateOne).not.toHaveBeenCalled();
@@ -651,7 +645,6 @@ describe('US 1-8 hotel manager delete response to review', () => {
     },
     reply: {
       _id: 'replyId123',
-      title: 'Existing response',
       text: 'Some text'
     }
   };
@@ -671,7 +664,6 @@ describe('US 1-8 hotel manager delete response to review', () => {
     },
     reply: {
       _id: 'replyId123',
-      title: 'Existing response',
       text: 'Some text'
     }
   };
@@ -827,7 +819,6 @@ describe('US 1-8 hotel manager delete response to review', () => {
       booking: null,
       reply: {
         _id: 'replyId123',
-        title: 'Existing response',
         text: 'Some text'
       }
     };
