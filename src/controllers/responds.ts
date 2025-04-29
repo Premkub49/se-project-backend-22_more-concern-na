@@ -49,7 +49,7 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
        ){
          res
         .status(400)
-        .json({ success: false, msg: 'Rating, title, and text are required' });
+        .json({ success: false, msg: 'text are required' });
          return;
        }
       if(respond) 
@@ -101,14 +101,12 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
          _id: review.reply._id
       }
       if (
-         respond.title == null || 
-         respond.text == null || 
-         respond.title.trim() === "" || 
+         respond.text == null ||
          respond.text.trim() === ""
        ){
          res
         .status(400)
-        .json({ success: false, msg: 'Rating, title, and text are required' });
+        .json({ success: false, msg: 'text are required' });
          return;
        }
       await Review.updateOne({_id: reviewId},{$set: {reply: respond}});
