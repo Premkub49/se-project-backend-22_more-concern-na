@@ -160,6 +160,9 @@ export async function userRedemption(req: Request, res: Response, next: NextFunc
             responseErrorMsg(res,404,'Not Found from ID','Not Found');
             return;
         }
+        if(req.user.point < redeemable.point){
+            responseErrorMsg(res,403,'แพงเกิน point ไม่พอ','Forbiden');
+        }
         if(redeemable.remain <= 0) {
             responseErrorMsg(res,404,'หมดแล้วจ้า','Not Found');
             return;
