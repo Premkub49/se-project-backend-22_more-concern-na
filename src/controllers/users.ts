@@ -85,7 +85,9 @@ export async function updateUserPoint(req: Request, res:Response, next: NextFunc
         .json({ success: false, msg: 'Not authorized to access this route' });
       return;
     }
-
+    if(!req.body){
+      responseErrorMsg(res,400,'Send point in body!','Bad Request');
+    }
     if (!Object.prototype.hasOwnProperty.call(req.body, "point") || Object.keys(req.body).length !== 1) {
       res.status(400).json({ success: false, msg: "Only 'point' field can be updated" });
       return;
@@ -111,7 +113,7 @@ export async function updateUserPoint(req: Request, res:Response, next: NextFunc
           { _id: req.params.userId },
           { $set: { point } }
         );
-        res.status(200).json({ success: true , point:point});
+        res.status(200).json({ success: true , point});
   }catch(err: any){
     console.log(err);
     //res.status(500).json({ success: false, msg: 'Server error' });
