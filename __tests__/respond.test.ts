@@ -287,6 +287,33 @@ describe('US 1-6 hotel manager add response to review', () => {
     );
   });
 
+  it('❌ blocks response when title or text is empty', async () => {
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(mockReviewNoReply)
+    }));
+
+    const req = { 
+      ...baseReq,
+      body: { title: '', text: '' } // Empty title
+    } as unknown as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await addRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Rating, title, and text are required'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
+  });
+
 });
 
 /*
@@ -574,6 +601,33 @@ describe('US 1-7 hotel manager update response to review', () => {
         msg: 'Server error'
       })
     );
+  });
+
+  it('❌ blocks update when title or text is empty', async () => {
+    // Arrange
+    (Review.findById as jest.Mock).mockImplementation(() => ({
+      populate: jest.fn().mockResolvedValue(mockReviewWithReply)
+    }));
+
+    const req = { 
+      ...baseReq,
+      body: { title: '', text: '' } // Empty title
+    } as unknown as Request;
+    const res = mockRes();
+    const next = jest.fn() as jest.MockedFunction<NextFunction>;
+
+    // Act
+    await updateRespond(req, res, next);
+
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        msg: 'Rating, title, and text are required'
+      })
+    );
+    expect(Review.updateOne).not.toHaveBeenCalled();
   });
 });
 
