@@ -43,7 +43,18 @@ export async function addRespond( req: Request, res: Response, next: NextFunctio
          title: req.body.title as string,
          text: req.body.text as string,
       }
-
+      if (
+         respond.title == null || 
+         respond.text == null || 
+         respond.title.trim() === "" || 
+         respond.text.trim() === ""
+       ){
+         res
+        .status(400)
+        .json({ success: false, msg: 'Rating, title, and text are required' });
+         return;
+       }
+      if(respond) 
       await Review.updateOne({_id: reviewId},{$set: {reply: respond}});
       res.status(201).json({ success: true });
    } catch (err: any) {
@@ -91,7 +102,17 @@ export async function updateRespond( req: Request, res: Response, next: NextFunc
          text: req.body.text as string,
          _id: review.reply._id
       }
-
+      if (
+         respond.title == null || 
+         respond.text == null || 
+         respond.title.trim() === "" || 
+         respond.text.trim() === ""
+       ){
+         res
+        .status(400)
+        .json({ success: false, msg: 'Rating, title, and text are required' });
+         return;
+       }
       await Review.updateOne({_id: reviewId},{$set: {reply: respond}});
       res.status(200).json({ success: true });
    } catch (err: any) {
