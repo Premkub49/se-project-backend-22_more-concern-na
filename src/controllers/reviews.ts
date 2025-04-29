@@ -134,7 +134,13 @@ export async function addReview(
     }
 
     const review: IReview = req.body;
-    if (!review.rating || !review.title || !review.text) {
+    if (
+      review.rating == null || 
+      review.title == null || 
+      review.text == null || 
+      review.title.trim() === "" || 
+      review.text.trim() === ""
+    ) {
       res
         .status(400)
         .json({ success: false, msg: 'Rating, title, and text are required' });
@@ -231,7 +237,13 @@ export async function updateReview(
 
     const { rating, title, text } = req.body;
 
-    if (!rating || !title || !text) {
+    if (
+      rating == null || 
+      title == null || 
+      text == null || 
+      title.trim() === "" || 
+      text.trim() === ""
+    ) {
       res
         .status(400)
         .json({ success: false, msg: 'Rating, title, and text are required' });
